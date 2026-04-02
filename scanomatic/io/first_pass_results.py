@@ -164,7 +164,10 @@ class CompilationResults:
         other_image_models = []
         other_directory = os.path.dirname(other._compilation_path)
         for index in range(len(other)):
-            model: CompileImageAnalysisModel = copy(other[index])
+            other_model = other[index]
+            if other_model is None:
+                continue
+            model: CompileImageAnalysisModel = copy(other_model)
             model.image.time_stamp += start_time_difference
             model.image.index += other_start_index
             self._update_image_path_if_needed(model, other_directory)
@@ -204,7 +207,7 @@ class CompilationResults:
         return 0.
 
     @property
-    def compile_instructions(self) -> CompileInstructionsModel:
+    def compile_instructions(self) -> Optional[CompileInstructionsModel]:
         return self._compile_instructions
 
     @property
@@ -223,11 +226,13 @@ class CompilationResults:
         return len(self._image_models) + len(self._used_models)
 
     @property
-    def current_image(self) -> CompileImageAnalysisModel:
+    def current_image(self) -> Optional[CompileImageAnalysisModel]:
         return self._current_model
 
     @property
     def current_absolute_time(self) -> float:
+        if self.current_image is None or self.compile_instructions is None:
+            return 0.0
         return (
             self.current_image.image.time_stamp
             + self.compile_instructions.start_time
@@ -271,12 +276,11 @@ class CompilationResults:
                 'w',
             ) as fh:
                 while True:
-                    model: CompileImageAnalysisModel = copy(
-                        self.get_next_image_model(),
-                    )
-                    self._update_image_path_if_needed(model, directory)
-                    if model is None:
+                    next_model = self.get_next_image_model()
+                    if next_model is None:
                         break
+                    model: CompileImageAnalysisModel = copy(next_model)
+                    self._update_image_path_if_needed(model, directory)
                     if validate(model):
                         dump_to_stream(model, fh)
         except IOError:

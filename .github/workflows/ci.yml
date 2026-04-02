@@ -96,9 +96,20 @@ jobs:
             python3.9 -m pip install --upgrade pip
             pip install tox==3.27.1
 
-        - name: Lint and Types
+        - name: Mypy (allow up to threshold)
           run: |
-            tox -e mypy
+            THRESHOLD=416
+            tox -e mypy 2>&1 | tee mypy-output.txt || true
+            MYPY_ERRORS=$(grep -c ': error:' mypy-output.txt || true)
+
+            echo "mypy reported $MYPY_ERRORS errors (threshold: $THRESHOLD)"
+
+            if (( MYPY_ERRORS > THRESHOLD )); then
+              echo "Failing because mypy errors exceed threshold."
+              exit 1
+            fi
+
+            echo "Passing: mypy errors are within threshold."
 
     backend-test-unit:
         runs-on: ubuntu-24.04

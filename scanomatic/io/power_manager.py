@@ -96,7 +96,7 @@ class PowerManagerNull:
 
         self._power_mode = power_mode
         self._socket = socket
-        self._host = None
+        self._host: Optional[str] = None
         self.name = name
         self._logger = get_logger("Power Manager {0}".format(name))
 
@@ -280,7 +280,7 @@ class PowerManagerLan(PowerManagerNull):
             name="LAN",
             power_mode=power_mode,
         )
-        self._host = host
+        self._host: Optional[str] = host
         self._mac = mac
         if password is None:
             password = "1"

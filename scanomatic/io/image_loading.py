@@ -184,6 +184,8 @@ def load_colony_images_for_animation(
 
     if not project_compilation:
         project_compilation = _get_project_compilation(analysis_directory)
+    if project_compilation is None:
+        raise ValueError("Could not locate a project compilation file")
 
     experiment_directory = os.path.dirname(project_compilation)
 
@@ -201,7 +203,6 @@ def load_colony_images_for_animation(
         entry.image.time_stamp for entry in compilation_results
     ))
     images = np.zeros(tuple(grid_size) + times.shape, dtype=np.uint16)
-    im = None
     ref_plate_model = compilation_results[-1].fixture.plates
 
     for i, entry in enumerate(compilation_results):
@@ -223,4 +224,4 @@ def load_colony_images_for_animation(
             experiment_directory=experiment_directory,
         )
 
-    return times, images, im
+    return times, images, images[..., -1]

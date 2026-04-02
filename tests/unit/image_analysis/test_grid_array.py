@@ -9,7 +9,7 @@ from numpy import ndarray
 from scanomatic.image_analysis import grid_array as grid_array_module
 from scanomatic.models.factories.analysis_factories import AnalysisModelFactory
 
-MockedGridCell = namedtuple('GridCell', ['xy1', 'xy2'])
+MockedGridCell = namedtuple('MockedGridCell', ['xy1', 'xy2'])
 
 
 def _get_grid_array_instance(im):

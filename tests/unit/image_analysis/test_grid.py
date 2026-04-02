@@ -109,7 +109,10 @@ class TestGetGrid:
         TODO: Expect proximity to curated positions
         """
         expected_spacings = (212, 212)
-        expected_center = tuple([s / 2.0 for s in easy_plate.shape])
+        expected_center = (
+            easy_plate.shape[0] / 2.0,
+            easy_plate.shape[1] / 2.0,
+        )
         validate_parameters = False
         grid_shape = (12, 8)
         grid_correction = None
@@ -138,7 +141,10 @@ class TestGetGrid:
 
     def test_getting_expecting_wrong_spacings_fails(self, easy_plate):
         expected_spacings = (137, 137)
-        expected_center = tuple([s / 2.0 for s in easy_plate.shape])
+        expected_center = (
+            easy_plate.shape[0] / 2.0,
+            easy_plate.shape[1] / 2.0,
+        )
         validate_parameters = False
         grid_shape = (12, 8)
         grid_correction = None
@@ -157,7 +163,10 @@ class TestGetGrid:
     def test_getting_grid_hard_plate(self, hard_plate):
         """Only expect to be a correctly shaped grid."""
         expected_spacings = (212, 212)
-        expected_center = tuple([s / 2.0 for s in hard_plate.shape])
+        expected_center = (
+            hard_plate.shape[0] / 2.0,
+            hard_plate.shape[1] / 2.0,
+        )
         validate_parameters = False
         grid_shape = (12, 8)
         grid_correction = None

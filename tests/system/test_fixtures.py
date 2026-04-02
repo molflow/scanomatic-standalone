@@ -1,4 +1,4 @@
-from selenium.webdriver.common.by import By  # type: ignore
+from selenium.webdriver.common.by import By
 
 
 def test_new_fixture_name(scanomatic, browser):

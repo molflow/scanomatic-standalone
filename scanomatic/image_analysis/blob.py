@@ -1,4 +1,5 @@
 import warnings
+from typing import Optional
 
 import numpy as np
 from scipy.ndimage import (  # type: ignore
@@ -17,7 +18,7 @@ class AnalysisRecipeAbstraction:
 
     def __init__(
         self,
-        parent: "AnalysisRecipeAbstraction" = None,
+        parent: Optional["AnalysisRecipeAbstraction"] = None,
         description: str = "",
     ):
         self.analysis_order: list["AnalysisRecipeAbstraction"] = [self]
@@ -63,7 +64,7 @@ class AnalysisRecipeAbstraction:
 
 class AnalysisRecipeEmpty(AnalysisRecipeAbstraction):
 
-    def __init__(self, parent: "AnalysisRecipeAbstraction" = None):
+    def __init__(self, parent: Optional["AnalysisRecipeAbstraction"] = None):
 
         super(AnalysisRecipeEmpty, self).__init__(
             parent,
