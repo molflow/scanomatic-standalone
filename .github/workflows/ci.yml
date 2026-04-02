@@ -63,7 +63,7 @@ jobs:
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Lint and Types
           run: |
@@ -82,7 +82,7 @@ jobs:
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Lint and Types
           run: |
@@ -101,7 +101,7 @@ jobs:
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run unit tests
           run: |
@@ -120,7 +120,7 @@ jobs:
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run integration tests
           run: |
@@ -143,7 +143,7 @@ jobs:
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run headless system test
           uses: GabrielBB/xvfb-action@v1

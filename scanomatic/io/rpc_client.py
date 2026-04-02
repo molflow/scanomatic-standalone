@@ -1,5 +1,7 @@
 import enum
+import shutil
 import socket
+import sys
 import xmlrpc.client
 from collections.abc import Callable
 from http.client import CannotSendRequest, ResponseNotReady
@@ -80,7 +82,12 @@ class _ClientProxy:
     def launch_local(self) -> None:
         if self.online is False and self.local:
             self._logger.info("Launching new local server")
-            Popen(["scan-o-matic_server"])
+            launcher = shutil.which("scan-o-matic_server")
+            if launcher is not None:
+                # Use the active interpreter to avoid shebang/path issues.
+                Popen([sys.executable, launcher])
+            else:
+                Popen(["scan-o-matic_server"])
         else:
             self._logger.warning(
                 "Can't launch because server is {0}".format(

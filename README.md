@@ -45,4 +45,17 @@ Currently this is not required as the code is still riddled with type errors, ho
 ### System tests
 
 System tests require `firefox`, `geckodriver`, `google-chrome` and `chromedriver` to be installed on host system.
-After that it run with `tox -e system`.
+After that they can be run with `tox -e system`.
+
+By default the test fixture uses Docker Compose when a working Docker daemon is available, and automatically falls back to a local in-container server when Docker is unavailable (for example inside a dev container without nested Docker).
+
+You can force mode selection with `SOM_SYSTEM_TEST_MODE`:
+- `SOM_SYSTEM_TEST_MODE=docker tox -e system`
+- `SOM_SYSTEM_TEST_MODE=local tox -e system`
+
+The devcontainer installs browser dependencies for system tests, including `firefox-esr`, `geckodriver`, `google-chrome` and `chromedriver`.
+To verify installed versions inside the container:
+- `firefox --version`
+- `geckodriver --version`
+- `google-chrome --version`
+- `chromedriver --version`

@@ -4,7 +4,7 @@ WORKDIR /src
 RUN npm ci
 RUN npm run build
 
-FROM python:3.9
+FROM python:3.9-bullseye
 RUN apt-get update
 RUN export DEBIAN_FRONTEND=noninteractive \
     && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \

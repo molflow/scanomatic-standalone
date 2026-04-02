@@ -1,0 +1,41 @@
+{
+  "name": "scanomatic-standalone",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  "remoteUser": "root",
+  "runArgs": [
+    "--privileged",
+    "--device=/dev/bus/usb:/dev/bus/usb"
+  ],
+  "containerEnv": {
+    "LOGGING_LEVEL": "20",
+    "SOM_PROJECTS_ROOT": "/somprojects",
+    "SOM_SETTINGS": "/root/.scan-o-matic"
+  },
+  "mounts": [
+    "source=scanomatic-settings,target=/root/.scan-o-matic,type=volume",
+    "source=scanomatic-projects,target=/somprojects,type=volume"
+  ],
+  "forwardPorts": [
+    5000
+  ],
+  "portsAttributes": {
+    "5000": {
+      "label": "Scan-o-Matic",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "bash .devcontainer/postCreate.sh",
+  "postStartCommand": "bash .devcontainer/postStart.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}
