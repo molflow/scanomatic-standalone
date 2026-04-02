@@ -1,19 +1,25 @@
-FROM node:16 as npmbuilder
+FROM node:16 AS npmbuilder
 COPY . /src
 WORKDIR /src
 RUN npm ci
 RUN npm run build
 
-FROM python:3.9
+FROM python:3.9-bullseye
 RUN apt-get update
 RUN export DEBIAN_FRONTEND=noninteractive \
     && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
     && apt-get install -y tzdata \
     && dpkg-reconfigure --frontend noninteractive tzdata
-RUN apt-get -y install usbutils software-properties-common
-# net-tools & iputils-ping are used in the xml-writer which should be removed soon
-RUN apt-get -y install net-tools iputils-ping
-RUN apt-get -y install libsane sane-utils libsane-common
+RUN apt-get update \
+    && apt-get -y install \
+        usbutils \
+        software-properties-common \
+        net-tools \
+        iputils-ping \
+        libsane \
+        sane-utils \
+        libsane-common \
+    && rm -rf /var/lib/apt/lists/*
 # Add scanner id to sane config in case scanimage -L cannot find the scanner automatically
 # Epson V800
 RUN echo "usb 0x4b8 0x12c" >> /etc/sane.d/epson2.conf

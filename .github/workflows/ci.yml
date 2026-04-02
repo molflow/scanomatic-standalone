@@ -2,11 +2,17 @@ name: Scan-o-Matic CI
 
 on: [push]
 
+permissions:
+  contents: read
+
 jobs:
     frontend-lint:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
 
         - name: Install
           run: |
@@ -17,9 +23,12 @@ jobs:
             npm run lint
 
     frontend-test:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
         - uses: browser-actions/setup-chrome@latest
         - uses: nanasess/setup-chromedriver@master
 
@@ -38,9 +47,12 @@ jobs:
             npm test
 
     frontend-build:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
 
         - name: Install
           run: |
@@ -51,99 +63,99 @@ jobs:
             npm run build
 
     backend-lint:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
 
         - name: Setup Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v6
           with:
-            python-version: 3.9
+            python-version: '3.9'
 
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Lint and Types
           run: |
             tox -e lint
 
     backend-mypy:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
 
         - name: Setup Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v6
           with:
-            python-version: 3.9
+            python-version: '3.9'
 
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Lint and Types
           run: |
             tox -e mypy
 
     backend-test-unit:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
 
         - name: Setup Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v6
           with:
-            python-version: 3.9
+            python-version: '3.9'
 
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run unit tests
           run: |
             tox -e unit
 
     backend-test-integration:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
 
         - name: Setup Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v6
           with:
-            python-version: 3.9
+            python-version: '3.9'
 
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run integration tests
           run: |
             tox -e integration
 
     test-system:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
         - uses: browser-actions/setup-chrome@latest
         - uses: browser-actions/setup-firefox@latest
         - uses: browser-actions/setup-geckodriver@latest
         - uses: nanasess/setup-chromedriver@master
 
         - name: Setup Python
-          uses: actions/setup-python@v2
+          uses: actions/setup-python@v6
           with:
-            python-version: 3.9
+            python-version: '3.9'
 
         - name: Install General Dependencies
           run: |
             python3.9 -m pip install --upgrade pip
-            pip install tox
+            pip install tox==3.27.1
 
         - name: Run headless system test
           uses: GabrielBB/xvfb-action@v1
@@ -151,10 +163,10 @@ jobs:
             run: tox -e system
 
     docker-build:
-        runs-on: ubuntu-20.04
+        runs-on: ubuntu-24.04
         steps:
-        - uses: actions/checkout@v2
+        - uses: actions/checkout@v6
 
         - name: Build
           run: |
-            docker-compose build
+            docker compose build
