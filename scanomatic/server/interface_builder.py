@@ -4,7 +4,7 @@ import sys
 from functools import wraps
 from logging import Logger
 from time import sleep
-from typing import Any, Optional, Union, cast
+from typing import Optional, Union
 
 import scanomatic.generics.decorators as decorators
 import scanomatic.models.rpc_job_models as rpc_job_models
@@ -239,7 +239,7 @@ class InterfaceBuilder(SingeltonOneInit):
             self.logger.error("Server not fully initialized")
             return {}
 
-        pm = cast(Any, _SOM_SERVER.scanner_manager.power_manager)
+        pm = _SOM_SERVER.scanner_manager.power_manager
         keys = list(pm.keys())
         if (n_keys := len(keys)) != 1:
             self.logger.error(f"Found {n_keys} power managers, should be 1")

@@ -134,7 +134,7 @@ SubFactoryDict = dict[Type[Model], Type["AbstractModelFactory"]]
 
 class AbstractModelFactory:
     _LOGGER = None
-    MODEL: type[Any] = Model
+    MODEL = Model
     _SUB_FACTORIES: SubFactoryDict = {}
     STORE_SECTION_SERIALIZERS: dict[str, Any] = {}
 
@@ -438,12 +438,12 @@ class AbstractModelFactory:
                     if issubclass(td, Model) else td for td in type_def
                 )
             )
-        elif isinstance(type_def, type):
+        elif isinstance(type_def, Type):
             if type_def is Model:
                 return True, cls._SUB_FACTORIES
             elif issubclass(type_def, Model):
                 return True, {type_def: cls._SUB_FACTORIES[type_def]}
-        elif callable(type_def):
+        elif isinstance(type_def, Callable):
             return False, None
         return False, None
 

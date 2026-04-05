@@ -66,7 +66,7 @@ class CompileProjectEffector(proc_effector.ProcessEffector):
         self._fixture_settings: Optional[FixtureSettings] = None
         self._compile_instructions_path: Optional[str] = None
         self._has_mailed_issues = False
-        self._allowed_calls['progress'] = lambda: self.progress
+        self._allowed_calls['progress'] = self.progress
 
     @property
     def progress(self) -> float:

@@ -1,5 +1,5 @@
 import csv
-from typing import Any, Iterator, Optional, Union, cast
+from typing import Iterator, Optional, Union, cast
 
 import numpy as np
 import pandas as pd
@@ -136,9 +136,7 @@ class ExcelLoader(DataLoader):
         doc = pd.ExcelFile(self._path)
         for n in doc.sheet_names:
             self._sheet_names.append(n)
-            self._load_sheet(
-                doc.parse(n, header=cast(Any, None)).fillna(value='')
-            )
+            self._load_sheet(doc.parse(n, header=None).fillna(value=''))
 
     def _load_sheet(self, df: pd.DataFrame) -> None:
         self._data.append(df)

@@ -3,8 +3,8 @@ import numpy as np
 
 class Histogram:
     def __init__(self, img, run_at_init=True, bins=256):
-        self._labels = None
-        self._counts = None
+        self.labels = None
+        self.counts = None
         self.bins = bins
 
         if run_at_init:
@@ -27,9 +27,9 @@ class Histogram:
         self.__checkSupport(img)
 
         self.nPixels = img.size
-        self._labels, self._counts = self._hist(img)
+        self.labels, self.counts = self._hist(img)
 
-        return (self._labels, self._counts)
+        return (self.labels, self.counts)
 
     def __checkSupport(self, img):
 
@@ -39,13 +39,11 @@ class Histogram:
                 "Support for color images is not yet supported by 'histogram'",
             )
 
-    @property
     def counts(self):
-        return self._counts
+        return self.counts
 
-    @property
     def labels(self):
-        return self._labels
+        return self.labels
 
     def _hist(self, img):
         # if image is of type uint8:
@@ -101,7 +99,7 @@ def otsu(histogram=None, labels=None, counts=None):
     mu2T = mu2T / sumT
 
     critValue = -1.0
-    threshold = -1.0
+    threshold = -1
 
     # Start checking through the labels/bins:
     #     Index 0 means properties of the zero:th class and

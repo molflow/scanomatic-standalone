@@ -143,8 +143,6 @@ class PhenotypeExtractionEffector(proc_effector.ProcessEffector):
         if not self._running:
             if not self._stopping:
                 if (self._phenotyper is not None):
-                    if self._analysis_base_path is None:
-                        raise RuntimeError("Analysis base path was not set")
                     self._phenotyper.save_state(
                         self._analysis_base_path,
                         ask_if_overwrite=False,

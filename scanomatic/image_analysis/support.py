@@ -94,8 +94,7 @@ def get_pinning_matrices(query, sep=':'):
     }
 
     plate_strings = query.split(sep)
-    plates: list[Optional[tuple[int, int]]] = []
-    plates.extend(None for _ in plate_strings)
+    plates: list[Optional[tuple[int, int]]] = len(plate_strings) * [None]
 
     for i, p in enumerate(plate_strings):
 
