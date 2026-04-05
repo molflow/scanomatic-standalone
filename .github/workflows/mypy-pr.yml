@@ -1,0 +1,55 @@
+name: Scan-o-Matic Mypy PR Gate
+
+on: [pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+    backend-mypy:
+        runs-on: ubuntu-24.04
+        steps:
+        - uses: actions/checkout@v6
+          with:
+            fetch-depth: 0
+
+        - name: Setup Python
+          uses: actions/setup-python@v6
+          with:
+            python-version: '3.9'
+
+        - name: Install General Dependencies
+          run: |
+            python3.9 -m pip install --upgrade pip
+            pip install tox==3.27.1
+
+        - name: Mypy global non-regression
+          run: |
+            set -euo pipefail
+
+            count_mypy_issues() {
+              local output_file="$1"
+              tox -e mypy 2>&1 | tee "$output_file" || true
+              grep -E -c ': (error|warning):' "$output_file" || true
+            }
+
+            HEAD_SHA=$(git rev-parse HEAD)
+            BASE_REF="${{ github.base_ref }}"
+            git fetch --no-tags origin "$BASE_REF" --depth=1
+
+            HEAD_ISSUES=$(count_mypy_issues mypy-head.txt)
+
+            git checkout --quiet "origin/$BASE_REF"
+            BASE_ISSUES=$(count_mypy_issues mypy-base.txt)
+
+            git checkout --quiet "$HEAD_SHA"
+
+            echo "mypy issues on base: $BASE_ISSUES"
+            echo "mypy issues on head: $HEAD_ISSUES"
+
+            if (( HEAD_ISSUES > BASE_ISSUES )); then
+              echo "Failing because this PR increases global mypy issues."
+              exit 1
+            fi
+
+            echo "Passing: this PR does not increase global mypy issues."
