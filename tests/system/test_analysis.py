@@ -5,9 +5,9 @@ from warnings import warn
 
 import pytest
 import requests
-from selenium.webdriver.common.by import By  # type: ignore
-from selenium.webdriver.common.keys import Keys  # type: ignore
-from selenium.webdriver.support.ui import Select  # type: ignore
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import Select
 
 
 @pytest.fixture(autouse=True)
