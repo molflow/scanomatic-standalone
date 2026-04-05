@@ -28,28 +28,39 @@ jobs:
             set -euo pipefail
 
             count_mypy_issues() {
-              local output_file="$1"
+              local label="$1"
+              local output_file="$2"
+              local issues
+
+              echo "Running mypy on $label..."
               tox -e mypy 2>&1 | tee "$output_file" || true
-              grep -E -c ': (error|warning):' "$output_file" || true
+
+              # Prefer mypy's own final total when present.
+              issues=$(grep -Eo 'Found [0-9]+ errors?' "$output_file" | tail -n1 | grep -Eo '[0-9]+' || true)
+              if [[ -z "$issues" ]]; then
+                issues=$(grep -E -c ': (error|warning):' "$output_file" || true)
+              fi
+
+              echo "mypy issues on $label: $issues"
+              MYPY_ISSUES="$issues"
             }
 
             HEAD_SHA=$(git rev-parse HEAD)
-            BASE_REF="${{ github.base_ref }}"
-            git fetch --no-tags origin "$BASE_REF" --depth=1
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            git fetch --no-tags origin "$BASE_SHA" --depth=1
 
-            HEAD_ISSUES=$(count_mypy_issues mypy-head.txt)
+            count_mypy_issues "head" mypy-head.txt
+            HEAD_ISSUES="$MYPY_ISSUES"
 
-            git checkout --quiet "origin/$BASE_REF"
-            BASE_ISSUES=$(count_mypy_issues mypy-base.txt)
+            git checkout --quiet "$BASE_SHA"
+            count_mypy_issues "base" mypy-base.txt
+            BASE_ISSUES="$MYPY_ISSUES"
 
             git checkout --quiet "$HEAD_SHA"
 
-            echo "mypy issues on base: $BASE_ISSUES"
-            echo "mypy issues on head: $HEAD_ISSUES"
-
             if (( HEAD_ISSUES > BASE_ISSUES )); then
-              echo "Failing because this PR increases global mypy issues."
+              echo "Failing because this PR increases global mypy issues (head=$HEAD_ISSUES, base=$BASE_ISSUES)."
               exit 1
             fi
 
-            echo "Passing: this PR does not increase global mypy issues."
+            echo "Passing: this PR does not increase global mypy issues (head=$HEAD_ISSUES, base=$BASE_ISSUES)."
