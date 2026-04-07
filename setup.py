@@ -168,8 +168,11 @@ if len(sys.argv) > 1:
         cur_hash = hasher.hexdigest()
 
         try:
+            with open("version.hash", 'r', encoding='ascii') as fh:
+                prev_hash = fh.read().strip()
+        except UnicodeDecodeError:
             with open("version.hash", 'rb') as fh:
-                prev_hash = fh.read()
+                prev_hash = fh.read().hex()
         except IOError:
             prev_hash = None
 
@@ -187,7 +190,7 @@ if len(sys.argv) > 1:
             get_hash_all_files("data", depth=5, hasher=hasher)
             cur_hash = hasher.hexdigest()
 
-            with open("version.hash", 'wb') as fh:
+            with open("version.hash", 'w', encoding='ascii') as fh:
                 fh.write(cur_hash)
 
         else:
