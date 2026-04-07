@@ -1,4 +1,4 @@
-[![Scan-o-Matic CI](https://github.com/Scan-o-Matic/scanomatic-standalone/actions/workflows/ci.yml/badge.svg)](https://github.com/Scan-o-Matic/scanomatic-standalone/actions/workflows/ci.yml)
+
 
 # Scan-o-matic (program) and scanomatic (python module)
 
@@ -16,6 +16,43 @@ Please refer to the general [Scan-o-Matic Wiki](https://github.com/Scan-o-Matic/
 4. Create an environment-file or export the `SOM_PROJECTS_ROOT` and `SOM_SETTINGS` variables. Each pointing to a location where you wish to store your projects and settings respectively. See https://docs.docker.com/compose/environment-variables/#the-env-file for specifying them in an env-file, else include them in e.g. your `.bashrc`. Neither path should point to directories inside the local copy of the git-repository.
 5. Run `docker-compose up -d`. Omit the `-d` if you don't wish to run it in the background.
 6. In your browser navigate to `http://localhost:5000`
+
+## Setting up with prebuilt images (GHCR)
+
+If you don't want to build locally, you can run Scan-o-Matic directly from prebuilt container images published to GitHub Container Registry (GHCR).
+
+Image repository:
+
+`ghcr.io/molflow/scanomatic-standalone`
+
+Tag recommendations:
+
+1. Use `latest` for the newest stable release.
+2. Use a pinned version tag (for example `3.0.1` or `v3.0.1`) for reproducible deployments.
+3. Avoid prerelease tags in production unless you explicitly want release candidates.
+
+### Example compose.yml
+
+```yaml
+services:
+  scanomatic:
+    image: ghcr.io/molflow/scanomatic-standalone:latest
+    privileged: true
+    ports:
+      - "5000:5000"
+    environment:
+      - LOGGING_LEVEL=20
+    volumes:
+      - ${SOM_SETTINGS:-/tmp/.scan-o-matic}:/root/.scan-o-matic
+      - ${SOM_PROJECTS_ROOT:-/tmp/SoM}:/somprojects
+      - /dev/bus/usb:/dev/bus/usb
+```
+
+Then run:
+
+1. Create an env-file (or export env vars) for `SOM_SETTINGS` and `SOM_PROJECTS_ROOT`.
+2. Start with `docker compose up -d`.
+3. Open `http://localhost:5000` in your browser.
 
 ## Reporting issues
 
