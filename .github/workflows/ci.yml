@@ -66,58 +66,46 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
           uses: actions/setup-python@v6
           with:
-            python-version: '3.9'
-
-        - name: Install General Dependencies
-          run: |
-            python3.9 -m pip install --upgrade pip
-            pip install tox==3.27.1
+            python-version-file: '.python-version'
 
         - name: Lint and Types
           run: |
-            tox -e lint
+            uvx --with tox-uv tox -e lint
 
     backend-test-unit:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
           uses: actions/setup-python@v6
           with:
-            python-version: '3.9'
-
-        - name: Install General Dependencies
-          run: |
-            python3.9 -m pip install --upgrade pip
-            pip install tox==3.27.1
+            python-version-file: '.python-version'
 
         - name: Run unit tests
           run: |
-            tox -e unit
+            uvx --with tox-uv tox -e unit
 
     backend-test-integration:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
           uses: actions/setup-python@v6
           with:
-            python-version: '3.9'
-
-        - name: Install General Dependencies
-          run: |
-            python3.9 -m pip install --upgrade pip
-            pip install tox==3.27.1
+            python-version-file: '.python-version'
 
         - name: Run integration tests
           run: |
-            tox -e integration
+            uvx --with tox-uv tox -e integration
 
     test-system:
         runs-on: ubuntu-24.04
@@ -127,21 +115,17 @@ jobs:
         - uses: browser-actions/setup-firefox@latest
         - uses: browser-actions/setup-geckodriver@latest
         - uses: nanasess/setup-chromedriver@master
+        - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
           uses: actions/setup-python@v6
           with:
-            python-version: '3.9'
-
-        - name: Install General Dependencies
-          run: |
-            python3.9 -m pip install --upgrade pip
-            pip install tox==3.27.1
+            python-version-file: '.python-version'
 
         - name: Run headless system test
           uses: GabrielBB/xvfb-action@v1
           with:
-            run: tox -e system
+            run: uvx --with tox-uv tox -e system
 
     docker-build:
         runs-on: ubuntu-24.04

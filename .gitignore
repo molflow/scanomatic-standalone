@@ -40,3 +40,4 @@ geckodriver.log
 /.vscode
 *.orig
 .env
+/.*_cache

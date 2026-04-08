@@ -12,16 +12,12 @@ jobs:
         - uses: actions/checkout@v6
           with:
             fetch-depth: 0
+        - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
           uses: actions/setup-python@v6
           with:
-            python-version: '3.9'
-
-        - name: Install General Dependencies
-          run: |
-            python3.9 -m pip install --upgrade pip
-            pip install tox==3.27.1
+            python-version-file: '.python-version'
 
         - name: Mypy global non-regression
           run: |
@@ -33,7 +29,7 @@ jobs:
               local issues
 
               echo "Running mypy on $label..."
-              tox -e mypy 2>&1 | tee "$output_file" || true
+              uvx --with tox-uv tox -e mypy 2>&1 | tee "$output_file" || true
 
               # Prefer mypy's own final total when present.
               issues=$(grep -Eo 'Found [0-9]+ errors?' "$output_file" | tail -n1 | grep -Eo '[0-9]+' || true)

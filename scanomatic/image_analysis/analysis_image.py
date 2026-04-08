@@ -486,7 +486,7 @@ class ProjectImage:
         for i in range(len(im_shape)):
             slicer.append(get_slicer(i))
 
-        return section[slicer]
+        return section[tuple(slicer)]
 
     def _set_current_grid_move(self, d1, d2):
         self._grid_corrections = np.array((d1, d2))
