@@ -1,5 +1,6 @@
+from collections import deque
 from dataclasses import asdict
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, cast
 
 import numpy as np
 import pytest
@@ -55,7 +56,7 @@ class TestPhenotyperState:
             phenotype_filter_undo=tuple(),
             smooth_growth_data=np.ndarray([]),
             times_data=np.ndarray([]),
-            vector_meta_phenotypes=np.array([]),
+            vector_meta_phenotypes=cast(Any, np.array([])),
             vector_phenotypes=np.array([]),
         )
 
@@ -141,7 +142,7 @@ class TestPhenotyperState:
 
     @pytest.mark.parametrize("phenotype_filter_undo,phenotypes,expect", (
         (
-            np.arange(3),
+            tuple(deque() for _ in range(3)),
             None,
             False,
         ),
@@ -151,19 +152,19 @@ class TestPhenotyperState:
             False,
         ),
         (
-            np.arange(3),
+            tuple(deque() for _ in range(3)),
             np.arange(2),
             False,
         ),
         (
-            np.arange(3),
+            tuple(deque() for _ in range(3)),
             np.arange(3),
             True,
         ),
     ))
     def test_has_phenotype_filter_undo(
         self,
-        phenotype_filter_undo: Optional[np.ndarray],
+        phenotype_filter_undo: Optional[tuple[deque[Any], ...]],
         phenotypes: Optional[np.ndarray],
         expect: bool,
     ):
@@ -267,7 +268,7 @@ class TestPhenotyperState:
         assert PhenotyperState(
             phenotypes,
             np.arange(3),
-            vector_meta_phenotypes=vector_meta_phenotypes,
+            vector_meta_phenotypes=cast(Any, vector_meta_phenotypes),
         ).has_phenotype(phenotype) is expect
 
     @pytest.mark.parametrize("phenotype,normalized_phenotypes,expect", (
@@ -619,12 +620,12 @@ class TestPhenotyperState:
         actual = PhenotyperState(
             phenotypes,
             np.arange(2),
-            vector_meta_phenotypes=vector_meta_phenotypes,
+            vector_meta_phenotypes=cast(Any, vector_meta_phenotypes),
             normalized_phenotypes=normalized_phenotypes,
             phenotype_filter=phenotype_filter,
         ).get_phenotype(
             settings,
-            phenotype,
+            cast(Any, phenotype),
             filtered,
             norm_state,
             reference_values,

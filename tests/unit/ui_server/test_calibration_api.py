@@ -6,8 +6,8 @@ from unittest import mock
 import numpy as np
 import pytest
 from flask import Flask
-from scipy.ndimage import center_of_mass  # type: ignore
-from scipy.stats import norm  # type: ignore
+from scipy.ndimage import center_of_mass
+from scipy.stats import norm
 
 from scanomatic.data_processing import calibration
 from scanomatic.io.ccc_data import parse_ccc

@@ -9,8 +9,12 @@ from scanomatic.ui_server import general
 @pytest.fixture(scope='module')
 def app():
     _app = Flask("--dummy--")
-    with _app.app_context():
+    context = _app.app_context()
+    context.push()
+    try:
         yield _app
+    finally:
+        context.pop()
 
 
 class TestJsonAbort:

@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-from scanomatic.generics import Model
+from scanomatic.generics.model import Model
 
 
 class VersionChangesModel(Model):
