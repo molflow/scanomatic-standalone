@@ -22,6 +22,8 @@ def grayscales(tmpdir, pytestconfig):
     for fname in ['grayscales.cfg']:
         source.join(fname).copy(target)
     grayscale._GRAYSCALE_PATH = str(target.join("grayscales.cfg"))
+    grayscale._GRAYSCALE_CONFIGS.clear()
+    grayscale._GRAYSCALE_CONFIGS.read(grayscale._GRAYSCALE_PATH)
 
 
 ProjInfo = namedtuple('ProjInfo', ['job', 'workdir'])

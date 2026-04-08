@@ -4,7 +4,7 @@ WORKDIR /src
 RUN npm ci
 RUN npm run build
 
-FROM python:3.11 AS wheelbuilder
+FROM python:3.12 AS wheelbuilder
 WORKDIR /src
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock README.md LICENSE /src/
@@ -15,7 +15,7 @@ COPY --from=npmbuilder /src/scanomatic/ui_server_data/js/somlib /src/scanomatic/
 RUN uv build --wheel --out-dir /tmp/wheels /src
 RUN uv export --frozen --no-dev --no-emit-project --project /src --output-file /tmp/requirements.txt
 
-FROM python:3.11-slim
+FROM python:3.12-slim
 RUN apt-get update
 RUN export DEBIAN_FRONTEND=noninteractive \
     && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
