@@ -179,7 +179,7 @@ class UnionModel(Model):
 def assert_models_deeply_equal(a: Any, b: Any) -> None:
     if a is b:
         return
-    elif type(a) != type(b):
+    elif a.__class__ is not b.__class__:
         raise ValueError(f'Model not equal types: {type(a)} != {type(b)}')
 
     assert isinstance(a, Model) and isinstance(b, Model), (

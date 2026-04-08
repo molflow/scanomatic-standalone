@@ -127,7 +127,7 @@ def loadCSV2Numpy(
                 dtype=dtype,
             )
 
-            if dtype == float:
+            if dtype is float:
                 plate *= np.nan
 
             data.append(plate)

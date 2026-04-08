@@ -16,7 +16,7 @@ class Histogram:
 
     def re_hist(self, img):
 
-        if type(img) == list:
+        if isinstance(img, list):
 
             img = np.asarray(img)
 

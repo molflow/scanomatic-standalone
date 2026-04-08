@@ -114,7 +114,6 @@ class ScannerFactory(AbstractModelFactory):
         "warned": bool,
         "owner": ScannerOwnerModel,
         "claiming": bool,
-        "power": bool,
         "reported": bool,
         "last_on": int,
         "last_off": int,

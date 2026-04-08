@@ -141,10 +141,11 @@ def save_state_to_zip(
     target: Optional[str] = None,
 ) -> Optional[BytesIO]:
     StateWriter = Callable[[BufferedWriter, Any], Any]
-    save_jsonizer: StateWriter = (
-        lambda fh, obj: fh.write(jsonizer.dumps(obj).encode())
-    )
-    save_pickle: StateWriter = lambda fh, obj: pickle.dump(obj, fh)
+    def save_jsonizer(fh: BufferedWriter, obj: Any) -> Any:
+        return fh.write(jsonizer.dumps(obj).encode())
+
+    def save_pickle(fh: BufferedWriter, obj: Any) -> Any:
+        return pickle.dump(obj, fh)
 
     def zipit(save_functions, data, zip_paths):
         zip_buffer = BytesIO()

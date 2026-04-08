@@ -320,7 +320,7 @@ def load_first(path: Union[str, Path]) -> Any:
 def _merge(model: Model, update: Model) -> bool:
     for key in model.keys():
         item = model[key]
-        if type(item) == type(update):
+        if item.__class__ is update.__class__:
             model[key] = update
             return True
         elif isinstance(item, Model):
@@ -353,14 +353,14 @@ def merge_into(
         for m in model:
             if merged:
                 ret.append(m)
-            elif type(m) == type(update):
+            elif m.__class__ is update.__class__:
                 ret.append(update)
                 merged = True
             else:
                 merged = _merge(m, update)
                 ret.append(m)
         return ret
-    elif model is None or type(model) == type(update):
+    elif model is None or model.__class__ is update.__class__:
         return update
     elif not _merge(model, update):
         _LOGGER.warning(
@@ -432,7 +432,7 @@ def _purge(
     elif isinstance(original, Model):
         if equality(original, model):
             return None
-        elif type(original) != type(model):
+        elif original.__class__ is not model.__class__:
             for key in original.keys():
                 original[key] = _purge(original[key], model, equality)
     return original
