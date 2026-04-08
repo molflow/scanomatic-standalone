@@ -1,16 +1,19 @@
 {
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "BABEL_ENV=test karma start --single-run",
     "build": "webpack",
     "lint": "eslint --ext mjs,jsx,js scanomatic/ui_server_data/js/ccc scanomatic/ui_server_data/js/tests"
   },
   "devDependencies": {
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^10.1.0",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-istanbul": "^4.1.6",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
+    "@babel/core": "^7.27.1",
+    "@babel/eslint-parser": "^7.27.1",
+    "@babel/preset-env": "^7.27.2",
+    "@babel/preset-react": "^7.27.1",
+    "babel-loader": "^9.2.1",
+    "babel-plugin-istanbul": "^7.0.0",
     "css-loader": "^5.0.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.0.2",
@@ -27,11 +30,11 @@
     "karma-coverage": "^2.1.0",
     "karma-jasmine": "^4.0.1",
     "karma-mocha-reporter": "^2.2.5",
-    "karma-webpack": "^2.0.13",
+    "karma-webpack": "^5.0.1",
     "react-test-renderer": "^16.0.0",
     "style-loader": "^2.0.0",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^4.9.2"
+    "webpack": "^5.99.8",
+    "webpack-cli": "^5.1.4"
   },
   "dependencies": {
     "bootstrap": "^3.4.0",

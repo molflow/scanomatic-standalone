@@ -1,4 +1,4 @@
-FROM node:16 AS npmbuilder
+FROM node:22 AS npmbuilder
 COPY . /src
 WORKDIR /src
 RUN npm ci
