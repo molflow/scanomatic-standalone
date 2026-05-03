@@ -315,6 +315,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
                 ),
                 fixture_type=FIXTURE.Global,
                 fixture_name=self._scanning_job.fixture,
+                overwrite_pinning_matrices=self._scanning_job.pinning_formats,
                 cell_count_calibration_id=(
                     self._scanning_job.cell_count_calibration_id
                 ),
