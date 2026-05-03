@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from collections.abc import Sequence
+from typing import Optional
 
 from scanomatic.generics.model import Model
 from scanomatic.models.fixture_models import FixtureModel
@@ -35,7 +36,7 @@ class CompileInstructionsModel(Model):
         self,
         compile_action=COMPILE_ACTION.InitiateAndSpawnAnalysis,
         start_time=0.0,
-        images=tuple(),
+        images: Optional[Sequence["CompileImageModel"]] = None,
         path="",
         start_condition="",
         fixture_type=FIXTURE.Local,
@@ -45,7 +46,7 @@ class CompileInstructionsModel(Model):
         cell_count_calibration_id="default",
     ):
         self.compile_action: COMPILE_ACTION = compile_action
-        self.images: Sequence[CompileImageModel] = images
+        self.images: list[CompileImageModel] = list(images or ())
         self.path: str = path
         self.start_time: float = start_time
         self.start_condition: str = start_condition

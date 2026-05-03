@@ -1,7 +1,7 @@
 import os
 import time
 from threading import Thread
-from typing import Union
+from typing import Any, Optional, cast
 
 from scanomatic.io import rpc_client
 from scanomatic.io import paths, sane, scanner_manager
@@ -218,8 +218,7 @@ It's a great time to start preparing the next experiment.
 
 All the best,
 
-Scan-o-Matic""",
-
+Scan-o-Matic"""
     )
 
 
@@ -246,8 +245,8 @@ class ScannerEffector(proc_effector.ProcessEffector):
 
         self._specific_statuses['total'] = 'total_images'
         self._specific_statuses['currentImage'] = 'current_image'
-        self._allowed_calls['setup'] = self.setup
-        self._allowed_calls[JOBS_CALL_SET_USB] = self._set_usb_port
+        self._allowed_calls['setup'] = cast(Any, self.setup)
+        self._allowed_calls[JOBS_CALL_SET_USB] = cast(Any, self._set_usb_port)
 
         self._scanning_effector_data = ScanningModelEffectorData(
             compile_project_model=None
@@ -268,7 +267,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
             SCAN_CYCLE.WaitForScanComplete: self._do_wait_for_scan,
             SCAN_CYCLE.WaitForUSB: self._do_wait_for_usb,
             SCAN_CYCLE.VerifyImageSize: self._do_verify_image_size,
-            SCAN_CYCLE.VerifyDiskspace: self._do_verify_image_size
+            SCAN_CYCLE.VerifyDiskspace: self._do_verify_discspace,
         }
 
     @property
@@ -284,10 +283,10 @@ class ScannerEffector(proc_effector.ProcessEffector):
             self._scanning_job.scanner,
             time_left)
 
-    def setup(self, job, redirect_logging=True):
+    def setup(self, job):
         job: RPCjobModel = loads(job)
         paths_object = paths.Paths()
-        self._scanning_job.id = job.id
+        self._scanning_job.id = job.id or ""
         self._scanning_job.computer = AppConfig().computer_human_name
         self._setup_directory()
 
@@ -315,6 +314,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
                 ),
                 fixture_type=FIXTURE.Global,
                 fixture_name=self._scanning_job.fixture,
+                overwrite_pinning_matrices=self._scanning_job.pinning_formats,
                 cell_count_calibration_id=(
                     self._scanning_job.cell_count_calibration_id
                 ),
@@ -331,9 +331,10 @@ class ScannerEffector(proc_effector.ProcessEffector):
         )
 
         self._scanning_job.scanning_program = sane.SaneBase.get_scan_program()
-        self._scanning_job.scanning_program_version = (
-            sane.SaneBase.get_program_version()
-        )
+        scan_program_version = sane.SaneBase.get_program_version()
+        if isinstance(scan_program_version, bytes):
+            scan_program_version = scan_program_version.decode("utf-8")
+        self._scanning_job.scanning_program_version = scan_program_version
 
         # NOTE: In actual scanning the scanner USB setting is prepended to the
         # settings
@@ -403,11 +404,11 @@ class ScannerEffector(proc_effector.ProcessEffector):
         return self._scanning_job.number_of_scans
 
     @property
-    def current_image(self) -> int:
+    def current_image(self) -> Optional[int]:
 
         return self._scanning_effector_data.current_image
 
-    def __next__(self) -> Union[bool, SCAN_CYCLE]:
+    def __next__(self) -> bool:
         if self.waiting:
             return super().__next__()
         elif not self._stopping:
@@ -484,11 +485,13 @@ class ScannerEffector(proc_effector.ProcessEffector):
             == SCAN_CYCLE.Wait
         ):
             self._stopping = True
+            compile_model = self._scanning_effector_data.compile_project_model
             if (
                 self._scanning_effector_data.compilation_state
                 is not COMPILE_STATE.Finalized
+                and compile_model is not None
             ):
-                self._scanning_effector_data.compile_project_model.compile_action = (  # noqa: E501
+                compile_model.compile_action = (
                     COMPILE_ACTION.AppendAndSpawnAnalysis
                     if self._scanning_effector_data.compilation_state is
                     COMPILE_STATE.Initialized
@@ -499,13 +502,13 @@ class ScannerEffector(proc_effector.ProcessEffector):
 
             raise StopIteration
         else:
-            return self._scanning_effector_data.current_cycle_step
+            return True
 
     @property
     def _job_completed(self) -> bool:
         return (
-            self.current_image >= self._scanning_job.number_of_scans
-            or self.current_image is None
+            self.current_image is None
+            or self.current_image >= self._scanning_job.number_of_scans
         )
 
     def _get_step_to_next_scan_cycle_step(self) -> SCAN_STEP:
@@ -520,7 +523,10 @@ class ScannerEffector(proc_effector.ProcessEffector):
     def _update_scan_cycle_step(self, step_action):
         if step_action is SCAN_STEP.NextMajor:
             self._scanning_effector_data.current_cycle_step = (
-                self._scanning_effector_data.current_cycle_step.next_major
+                cast(
+                    SCAN_CYCLE,
+                    self._scanning_effector_data.current_cycle_step.next_major,
+                )
             )
             self._logger.info(
                 "Entering step {0}".format(
@@ -530,7 +536,10 @@ class ScannerEffector(proc_effector.ProcessEffector):
 
         elif step_action is SCAN_STEP.NextMinor:
             self._scanning_effector_data.current_cycle_step = (
-                self._scanning_effector_data.current_cycle_step.next_minor
+                cast(
+                    SCAN_CYCLE,
+                    self._scanning_effector_data.current_cycle_step.next_minor,
+                )
             )
 
         elif step_action is SCAN_STEP.TruncateIteration:
@@ -550,7 +559,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
             self._scanning_effector_data.current_step_start_time = time.time()
 
     def _do_wait(self):
-        if self.current_image < 0:
+        if self.current_image is None or self.current_image < 0:
             self._start_time = time.time()
             self._scanning_effector_data.previous_scan_cycle_start = (
                 self.run_time
@@ -629,7 +638,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
                 self._logger.warning("Scan completed, but not successfully.")
                 self._mail(
                     "Scan-o-Matic: '{project_name}' error while scanning",
-                    som_mail_body_scan_fail(self.current_image),
+                    som_mail_body_scan_fail(self.current_image or 0),
                     self._scanning_job,
                 )
 
@@ -651,7 +660,8 @@ class ScannerEffector(proc_effector.ProcessEffector):
 
     @property
     def _scan_completed(self) -> bool:
-        return not self._scanning_effector_data.scanning_thread.is_alive()
+        scanning_thread = self._scanning_effector_data.scanning_thread
+        return bool(scanning_thread and not scanning_thread.is_alive())
 
     def _do_report_error_scanning(self):
 
@@ -770,12 +780,12 @@ class ScannerEffector(proc_effector.ProcessEffector):
                 self._scanning_effector_data.warned_file_size = True
                 self._mail(
                     "Scan-o-Matic: Project '{project_name}' got suspicious image",  # noqa: E501
-                    self._scanning_job,
                     som_mail_body_image_suspicious(
                         self._scanning_effector_data.current_image_path,
                         current_size,
                         self._scanning_effector_data.known_file_size,
-                    )
+                    ),
+                    self._scanning_job,
                 )
 
             return SCAN_STEP.TruncateIteration
@@ -792,7 +802,9 @@ class ScannerEffector(proc_effector.ProcessEffector):
         return SCAN_STEP.NextMinor
 
     def _removed_current_image(self):
-        del self._scanning_effector_data.compile_project_model.images[-1]
+        compile_model = self._scanning_effector_data.compile_project_model
+        if compile_model is not None and compile_model.images:
+            compile_model.images.pop()
         try:
             os.remove(self._scanning_effector_data.current_image_path)
         except OSError:
@@ -813,6 +825,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
         if (
             self._scanning_effector_data.known_file_size
             and not self._scanning_effector_data.warned_discspace
+            and self._scanning_effector_data.current_image is not None
         ):
 
             bytes_needed = (
@@ -845,6 +858,9 @@ class ScannerEffector(proc_effector.ProcessEffector):
         self._logger.info("Job {0} requested scanner on".format(
             self._scanning_job.id,
         ))
+        if self.pipe_effector is None:
+            self._logger.error("No pipe effector available to request scanner")
+            return SCAN_STEP.TruncateIteration
         self.pipe_effector.send(
             scanner_manager.JOB_CALL_SCANNER_REQUEST_ON,
             self._scanning_job.id,
@@ -856,11 +872,16 @@ class ScannerEffector(proc_effector.ProcessEffector):
         self._logger.info("Job {0} requested scanner off".format(
             self._scanning_job.id,
         ))
+        if self.pipe_effector is None:
+            self._logger.error("No pipe effector available to release scanner")
+            return SCAN_STEP.TruncateIteration
         self.pipe_effector.send(
             scanner_manager.JOB_CALL_SCANNER_REQUEST_OFF,
             self._scanning_job.id,
         )
         self._scanning_effector_data.usb_port = ""
+        if self._scanning_effector_data.current_image is None:
+            self._scanning_effector_data.current_image = 0
         self._scanning_effector_data.current_image += 1
         return SCAN_STEP.NextMajor
 
@@ -870,32 +891,35 @@ class ScannerEffector(proc_effector.ProcessEffector):
         If it is the first request of compilation, the COMPILE_ACTION
         is set to initiate from the setup-method.
         """
+        compile_model = self._scanning_effector_data.compile_project_model
+
         if (
             self._scanning_job.fixture
             and self._scanning_effector_data.compilation_state
             is not COMPILE_STATE.Finalized
+            and compile_model is not None
         ):
 
-            self._scanning_effector_data.compile_project_model.email = (
+            compile_model.email = (
                 self._scanning_job.email
-                if self._scanning_effector_data.compile_project_model.compile_action  # noqa: E501
+                if compile_model.compile_action
                 in (
                     COMPILE_ACTION.AppendAndSpawnAnalysis,
                     COMPILE_ACTION.InitiateAndSpawnAnalysis
                 )
-                else []
+                else ""
             )
 
             compile_job_id = self._rpc_client.create_compile_project_job(
                 compile_project_factory.CompileProjectFactory.to_dict(
-                    self._scanning_effector_data.compile_project_model,
+                    compile_model,
                 ),
             )
 
             if compile_job_id:
 
                 if (
-                    self._scanning_effector_data.compile_project_model.compile_action  # noqa: E501
+                    compile_model.compile_action
                     in (
                         COMPILE_ACTION.AppendAndSpawnAnalysis,
                         COMPILE_ACTION.InitiateAndSpawnAnalysis
@@ -916,20 +940,18 @@ class ScannerEffector(proc_effector.ProcessEffector):
                 )
 
                 if next_image_is_last:
-                    self._scanning_effector_data.compile_project_model.compile_action = (  # noqa: E501
+                    compile_model.compile_action = (
                         COMPILE_ACTION.AppendAndSpawnAnalysis
                     )
                 else:
-                    self._scanning_effector_data.compile_project_model.compile_action = (  # noqa: E501
+                    compile_model.compile_action = (
                         COMPILE_ACTION.Append
                     )
-                self._scanning_effector_data.compile_project_model.start_condition = (  # noqa: E501
+                compile_model.start_condition = (
                     compile_job_id
                 )
-                while (
-                    self._scanning_effector_data.compile_project_model.images
-                ):
-                    self._scanning_effector_data.compile_project_model.images.pop()  # noqa: E501
+                while compile_model.images:
+                    compile_model.images.pop()
                 self._logger.info(
                     f"Job {self._scanning_job.id} created compile project job",
                 )
@@ -969,6 +991,10 @@ class ScannerEffector(proc_effector.ProcessEffector):
             return SCAN_STEP.NextMajor
 
     def _scan_thread(self):
+        if self._scanner is None:
+            self._scanning_effector_data.scan_success = False
+            return
+
         self._scanning_effector_data.scan_success = (
             self._scanner.AcquireByFile(
                 scanner=self._scanning_effector_data.usb_port,
@@ -989,7 +1015,7 @@ class ScannerEffector(proc_effector.ProcessEffector):
     def _set_usb_port(self, port, scanner_model):
         self._logger.info("Got an usb port '{0}'".format(port))
         self._scanning_effector_data.scanner_model = scanner_model
-        if scanner_model:
+        if scanner_model and self._scanner is not None:
             self._scanner.model = scanner_model
         self._scanning_effector_data.usb_port = port
 
@@ -1000,6 +1026,8 @@ class ScannerEffector(proc_effector.ProcessEffector):
             path=path,
         )
 
-        self._scanning_effector_data.compile_project_model.images.append(
-            image_model,
-        )
+        compile_model = self._scanning_effector_data.compile_project_model
+        if compile_model is not None:
+            compile_model.images.append(
+                image_model,
+            )
