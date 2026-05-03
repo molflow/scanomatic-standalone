@@ -7,7 +7,7 @@ name = "scanomatic-standalone"
 version = "3.1.0"
 description = "High Throughput Solid Media Image Phenotyping Platform"
 readme = "README.md"
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.11,<3.14"
 license = { text = "GPL-3.0" }
 authors = [
   { name = "Martin Zackrisson", email = "martin.zackrisson@gu.se" }
@@ -35,7 +35,7 @@ dependencies = [
   "pillow>=10.4.0,<11.0.0",
   "odfpy==1.4.1",
   "sh==1.14.2",
-  "scikit-image>=0.18.3,<=0.22.0",
+  "scikit-image>=0.18.3",
   "setproctitle>=1.3.3,<2.0.0",
   "psutil>=5.9.8,<6.0.0",
   "chardet==4.0.0",
