@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import PolynomialConstructionContainer from '../../ccc/containers/PolynomialConstructionContainer';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
 
 describe('<PolynomialConstructionContainer />', () => {

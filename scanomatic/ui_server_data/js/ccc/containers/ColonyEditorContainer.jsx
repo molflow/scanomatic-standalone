@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import ColonyEditor from '../components/ColonyEditor';
-import * as API from '../api';
+import API from '../api';
 
 export default class ColonyEditorContainer extends React.Component {
   constructor(props) {

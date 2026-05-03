@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import * as API from './api';
+import API from './api';
 
 export class RGBColor {
   constructor(r, g, b) {
@@ -217,3 +217,19 @@ export function uploadImage(ccc, file, fixture, token, progress) {
     })
     .then(() => imageId);
 }
+
+const helperExports = {
+  RGBColor,
+  featureColors,
+  valueFormatter,
+  getDataUrlfromUrl,
+  getLinearMapping,
+  hexToRgb,
+  createCanvasImage,
+  createCanvasMarker,
+  getMarkerData,
+  loadImage,
+  uploadImage,
+};
+
+export default helperExports;

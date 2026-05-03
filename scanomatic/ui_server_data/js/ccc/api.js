@@ -285,3 +285,29 @@ export function finalizeCalibration(cccId, accessToken) {
     { access_token: accessToken },
   );
 }
+
+const APIExports = {
+  HasJquery,
+  GetSliceImageURL,
+  GetSliceImage,
+  GetFixtures,
+  GetFixturePlates,
+  GetPinningFormats,
+  InitiateCCC,
+  SetCccImageData,
+  SetCccImageSlice,
+  SetGrayScaleImageAnalysis,
+  GetGrayScaleAnalysis,
+  SetGrayScaleTransform,
+  SetGridding,
+  SetColonyDetection,
+  SetColonyCompression,
+  GetImageId,
+  GetMarkers,
+  GetTransposedMarkersV2,
+  GetTransposedMarkers,
+  SetNewCalibrationPolynomial,
+  finalizeCalibration,
+};
+
+export default APIExports;

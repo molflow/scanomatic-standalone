@@ -4,12 +4,13 @@ import {
   uploadImage,
   valueFormatter,
 } from '../ccc/helpers';
-import testPlateImageURL from './fixtures/testPlate.png';
-import * as API from '../ccc/api';
+import API from '../ccc/api';
+
+const tinyGifDataUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 describe('loadImage()', () => {
   it('should return a promise that resolves for a valid image URL', (done) => {
-    loadImage(testPlateImageURL).then(() => done());
+    loadImage(tinyGifDataUrl).then(() => done());
   });
 
   it('should return a promise that rejects for a bad image URL', (done) => {
