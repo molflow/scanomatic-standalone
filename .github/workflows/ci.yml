@@ -66,6 +66,9 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
         - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
@@ -81,6 +84,9 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
         - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
@@ -96,6 +102,9 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
         - uses: astral-sh/setup-uv@v6
 
         - name: Setup Python
@@ -111,6 +120,9 @@ jobs:
         runs-on: ubuntu-24.04
         steps:
         - uses: actions/checkout@v6
+        - uses: actions/setup-node@v6
+          with:
+            node-version-file: .nvmrc
         - uses: browser-actions/setup-chrome@latest
         - uses: browser-actions/setup-firefox@latest
         - uses: browser-actions/setup-geckodriver@latest
