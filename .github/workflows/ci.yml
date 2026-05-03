@@ -1,149 +1,149 @@
 name: Scan-o-Matic CI
 
-on: [push]
+on: [ push ]
 
 permissions:
   contents: read
 
 jobs:
-    frontend-lint:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
+  frontend-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
 
-        - name: Install
-          run: |
-            npm ci
+      - name: Install
+        run: |
+          npm ci
 
-        - name: Lint
-          run: |
-            npm run lint
+      - name: Lint
+        run: |
+          npm run lint
 
-    frontend-test:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
-        - uses: browser-actions/setup-chrome@latest
-        - uses: nanasess/setup-chromedriver@master
+  frontend-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - uses: browser-actions/setup-chrome@latest
+      - uses: nanasess/setup-chromedriver@master
 
-        - name: Setup Chromedriver
-          run: |
-            export DISPLAY=:99
-            chromedriver --url-base=/wd/hub &
-            sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+      - name: Setup Chromedriver
+        run: |
+          export DISPLAY=:99
+          chromedriver --url-base=/wd/hub &
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
 
-        - name: Install
-          run: |
-            npm ci
+      - name: Install
+        run: |
+          npm ci
 
-        - name: Test
-          run: |
-            npm test
+      - name: Test
+        run: |
+          npm test
 
-    frontend-build:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
+  frontend-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
 
-        - name: Install
-          run: |
-            npm ci
+      - name: Install
+        run: |
+          npm ci
 
-        - name: Builds
-          run: |
-            npm run build
+      - name: Builds
+        run: |
+          npm run build
 
-    backend-lint:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
-        - uses: astral-sh/setup-uv@v6
+  backend-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - uses: astral-sh/setup-uv@v7
 
-        - name: Setup Python
-          uses: actions/setup-python@v6
-          with:
-            python-version-file: '.python-version'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
 
-        - name: Lint and Types
-          run: |
-            uvx --with tox-uv tox -e lint
+      - name: Lint and Types
+        run: |
+          uvx --with tox-uv tox -e lint
 
-    backend-test-unit:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
-        - uses: astral-sh/setup-uv@v6
+  backend-test-unit:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - uses: astral-sh/setup-uv@v7
 
-        - name: Setup Python
-          uses: actions/setup-python@v6
-          with:
-            python-version-file: '.python-version'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
 
-        - name: Run unit tests
-          run: |
-            uvx --with tox-uv tox -e unit
+      - name: Run unit tests
+        run: |
+          uvx --with tox-uv tox -e unit
 
-    backend-test-integration:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
-        - uses: astral-sh/setup-uv@v6
+  backend-test-integration:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - uses: astral-sh/setup-uv@v7
 
-        - name: Setup Python
-          uses: actions/setup-python@v6
-          with:
-            python-version-file: '.python-version'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
 
-        - name: Run integration tests
-          run: |
-            uvx --with tox-uv tox -e integration
+      - name: Run integration tests
+        run: |
+          uvx --with tox-uv tox -e integration
 
-    test-system:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
-        - uses: actions/setup-node@v6
-          with:
-            node-version-file: .nvmrc
-        - uses: browser-actions/setup-chrome@latest
-        - uses: browser-actions/setup-firefox@latest
-        - uses: browser-actions/setup-geckodriver@latest
-        - uses: nanasess/setup-chromedriver@master
-        - uses: astral-sh/setup-uv@v6
+  test-system:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .nvmrc
+      - uses: browser-actions/setup-chrome@latest
+      - uses: browser-actions/setup-firefox@latest
+      - uses: browser-actions/setup-geckodriver@latest
+      - uses: nanasess/setup-chromedriver@master
+      - uses: astral-sh/setup-uv@v7
 
-        - name: Setup Python
-          uses: actions/setup-python@v6
-          with:
-            python-version-file: '.python-version'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version-file: ".python-version"
 
-        - name: Run headless system test
-          uses: GabrielBB/xvfb-action@v1
-          with:
-            run: uvx --with tox-uv tox -e system
+      - name: Run headless system test
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: uvx --with tox-uv tox -e system
 
-    docker-build:
-        runs-on: ubuntu-24.04
-        steps:
-        - uses: actions/checkout@v6
+  docker-build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
 
-        - name: Build
-          run: |
-            docker compose build
+      - name: Build
+        run: |
+          docker compose build
