@@ -3,9 +3,11 @@ import React from 'react';
 
 import '../components/enzyme-setup';
 import ImageUploadContainer from '../../ccc/containers/ImageUploadContainer';
-import * as helpers from '../../ccc/helpers';
+import helpers from '../../ccc/helpers';
 import cccMetadata from '../fixtures/cccMetadata';
 import FakePromise from '../helpers/FakePromise';
+
+const helperApi = helpers;
 
 describe('<ImageUploadContainer />', () => {
   const imageId = 'IMG0';
@@ -32,7 +34,7 @@ describe('<ImageUploadContainer />', () => {
     const image = new File(['foo'], 'myimage.tiff');
     const wrapper = mount(<ImageUploadContainer {...props} />);
     wrapper.find('ImageUpload').prop('onImageChange')(image);
-    expect(helpers.uploadImage).toHaveBeenCalledWith(
+    expect(helperApi.uploadImage).toHaveBeenCalledWith(
       cccMetadata.id,
       image,
       cccMetadata.fixtureName,
@@ -45,7 +47,7 @@ describe('<ImageUploadContainer />', () => {
     const image = new File(['foo'], 'myimage.tiff');
     const wrapper = mount(<ImageUploadContainer {...props} />);
     wrapper.find('ImageUpload').prop('onImageChange')(image);
-    const setProgress = helpers.uploadImage.calls.argsFor(0)[4];
+    const setProgress = helperApi.uploadImage.calls.argsFor(0)[4];
     setProgress(3, 4, 'You are here');
     wrapper.update();
     expect(wrapper.children().prop('progress'))
