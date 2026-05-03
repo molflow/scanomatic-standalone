@@ -894,12 +894,12 @@ class Blob(CellItem):
                 else:
                     composite_trash.append(item_label)
 
-            self.filter_array = np.in1d(
+            self.filter_array = np.isin(
                 label_array, np.array(composite_blob)).reshape(
                     self.filter_array.shape,
                 )
 
-            self.trash_array = np.in1d(
+            self.trash_array = np.isin(
                 label_array, np.array(composite_trash)).reshape(
                     self.filter_array.shape,
                 )
