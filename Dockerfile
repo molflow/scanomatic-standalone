@@ -9,7 +9,6 @@ WORKDIR /src
 RUN pip install --no-cache-dir uv
 COPY pyproject.toml uv.lock README.md LICENSE /src/
 COPY scanomatic/ /src/scanomatic/
-COPY scripts/ /src/scripts/
 COPY data/ /src/data/
 COPY --from=npmbuilder /src/scanomatic/ui_server_data/js/somlib /src/scanomatic/ui_server_data/js/somlib
 RUN uv build --wheel --out-dir /tmp/wheels /src
