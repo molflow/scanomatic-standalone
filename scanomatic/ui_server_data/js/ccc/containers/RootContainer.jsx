@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 import Root from '../components/Root';
 import * as API from '../api';
@@ -6,6 +7,7 @@ import * as API from '../api';
 export default class RootContainer extends React.Component {
   constructor(props) {
     super(props);
+    this.api = props.api || API;
     this.state = {
       cccMetadata: null,
       error: null,
@@ -17,7 +19,7 @@ export default class RootContainer extends React.Component {
   }
 
   handleInitializeCCC(species, reference, fixtureName, pinningFormat) {
-    API.InitiateCCC(species, reference).then(
+    this.api.InitiateCCC(species, reference).then(
       ({ identifier: id, access_token: accessToken }) => this.setState({
         error: null,
         cccMetadata: {
@@ -33,7 +35,7 @@ export default class RootContainer extends React.Component {
   handleFinalizeCCC() {
     const { cccMetadata } = this.state;
     const { id, accessToken } = cccMetadata;
-    API.finalizeCalibration(id, accessToken).then(
+    this.api.finalizeCalibration(id, accessToken).then(
       () => this.setState({ error: null, finalized: true }),
       (reason) => this.setState({
         error: `Finalization error: ${reason}`,
@@ -59,3 +61,14 @@ export default class RootContainer extends React.Component {
     );
   }
 }
+
+RootContainer.propTypes = {
+  api: PropTypes.shape({
+    InitiateCCC: PropTypes.func,
+    finalizeCalibration: PropTypes.func,
+  }),
+};
+
+RootContainer.defaultProps = {
+  api: null,
+};

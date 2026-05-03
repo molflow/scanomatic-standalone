@@ -4,13 +4,31 @@ const GetGrayScaleAnalysisPath = '/api/data/grayscale/image/';
 
 export const HasJquery = () => !!$;
 
+function getErrorReason(jqXHR) {
+  const { responseText } = jqXHR || {};
+  if (typeof responseText !== 'string') {
+    return 'Unknown error';
+  }
+
+  try {
+    const parsed = JSON.parse(responseText);
+    if (parsed && parsed.reason) {
+      return parsed.reason;
+    }
+  } catch (e) {
+    return responseText;
+  }
+
+  return responseText;
+}
+
 class API {
   static get(url) {
     return new Promise((resolve, reject) => $.ajax({
       url,
       type: 'GET',
       success: resolve,
-      error: (jqXHR) => reject(JSON.parse(jqXHR.responseText).reason),
+      error: (jqXHR) => reject(getErrorReason(jqXHR)),
     }));
   }
 
@@ -23,7 +41,7 @@ class API {
       data: formData,
       processData: false,
       success: resolve,
-      error: (jqXHR) => reject(JSON.parse(jqXHR.responseText).reason),
+      error: (jqXHR) => reject(getErrorReason(jqXHR)),
     }));
   }
 
@@ -36,7 +54,7 @@ class API {
     })
       .then(
         resolve,
-        (jqXHR) => reject(JSON.parse(jqXHR.responseText).reason),
+        (jqXHR) => reject(getErrorReason(jqXHR)),
       ));
   }
 }
