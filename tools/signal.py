@@ -1,8 +1,8 @@
 
 import numpy as np
 import numpy.typing as npt
-from scipy.ndimage import binary_dilation, binary_erosion  # type: ignore
-from scipy.signal import convolve, fftconvolve  # type: ignore
+from scipy.ndimage import binary_dilation, binary_erosion
+from scipy.signal import convolve, fftconvolve
 
 from scanomatic.io.logger import get_logger
 

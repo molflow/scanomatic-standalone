@@ -162,7 +162,7 @@ def _get_lock_state(lock_time, lock_key, alt_key) -> LockState:
 def _validate_lock_key(
     path,
     key: Optional[str] = "",
-    ip: str = "",
+    ip: Optional[str] = "",
     require_claim=True,
 ) -> tuple[LockState, dict]:
     if not key:
@@ -185,7 +185,7 @@ def _validate_lock_key(
             path,
             Paths().ui_server_phenotype_state_lock,
         )
-        _update_lock(lock_file_path, key, ip)
+        _update_lock(lock_file_path, key, ip or "")
     elif lock_state is LockState.LockedByOther:
         return (
             lock_state,
@@ -1409,15 +1409,23 @@ def add_routes(app):
             d1_row = data_object.get("d1_row", default=None)
 
         if d2_col is None:
-            d1_row = data_object.get("d2_col",  default=None)
+            d2_col = data_object.get("d2_col",  default=None)
 
         # Ensure format will be correctly interpreted by numpy
         try:
-            outer = d1_row if isinstance(d1_row, int) else tuple(d1_row)
+            outer = (
+                d1_row
+                if isinstance(d1_row, int)
+                else (None if d1_row is None else tuple(d1_row))
+            )
         except TypeError:
             outer = None
         try:
-            inner = d2_col if isinstance(d2_col, int) else tuple(d2_col)
+            inner = (
+                d2_col
+                if isinstance(d2_col, int)
+                else (None if d2_col is None else tuple(d2_col))
+            )
         except TypeError:
             inner = None
 

@@ -114,7 +114,10 @@ class TestAnalysisModels:
     def test_doesnt_overwrite_poly_coeffs_if_no_ccc_specified(self):
         coeffs = [1, 1, 2, 3, 5, 8]
         model = AnalysisModelFactory.create(cell_count_calibration=coeffs)
-        np.testing.assert_allclose(model.cell_count_calibration, coeffs)
+        np.testing.assert_allclose(
+            np.asarray(model.cell_count_calibration, dtype=float),
+            np.asarray(coeffs, dtype=float),
+        )
         assert model.cell_count_calibration_id is None
 
     @mock.patch(
@@ -123,7 +126,10 @@ class TestAnalysisModels:
     def test_can_create_using_ccc_id(self, my_mock):
         model = AnalysisModelFactory.create(cell_count_calibration_id='mock')
         assert model.cell_count_calibration_id == 'mock'
-        np.testing.assert_allclose(model.cell_count_calibration, [1, 3, 9, 27])
+        np.testing.assert_allclose(
+            np.asarray(model.cell_count_calibration, dtype=float),
+            np.asarray([1, 3, 9, 27], dtype=float),
+        )
 
     def test_create_with_unknown_ccc_raises_error(self):
         with pytest.raises(KeyError):

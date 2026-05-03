@@ -17,7 +17,7 @@ from scanomatic.data_processing.phenotyper import Phenotyper
 
 def build_test_phenotyper():
 
-    np.random.seed = 42
+    np.random.seed(42)
     x_data = np.arange(100) * 1/3.
     y_data = np.array([[[
         # 0: No data
@@ -44,6 +44,13 @@ def build_test_phenotyper():
     phenotyper_object.state.smooth_growth_data = y_data
 
     return phenotyper_object
+
+
+def locate_segment_bounds(filt):
+    left, right = _locate_segment(filt)
+    assert left is not None
+    assert right is not None
+    return left, right
 
 
 def build_model(phenotyper_object, test_curve):
@@ -86,7 +93,7 @@ def test_no_data():
     model = build_model(phenotyper_object, 0)
     data = {}
     filt = np.ones_like(model.times, dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
     left_time = model.times[left]
     right_time = model.times[right - 1]
 
@@ -104,14 +111,14 @@ def test_no_data():
 def test_locate_segment():
 
     filt = np.ones((20,), dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assert right - left == filt.sum()
 
     filt[:4] = False
     filt[-3:] = False
 
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assert left == 4
     assert right == 20 - 3
@@ -125,7 +132,7 @@ def test_assign_common_phase_phenotypes():
     model = build_model(phenotyper_object, 1)
     data = {}
     filt = np.ones_like(model.times, dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assign_common_phase_phenotypes(data, model, left, right)
 
@@ -206,7 +213,7 @@ def test_assign_non_linear_phase_phenotypes():
     model = build_model(phenotyper_object, 3)
     data = {}
     filt = np.ones_like(model.times, dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
     left_time = model.times[left]
     right_time = model.times[right - 1]
 
@@ -226,7 +233,7 @@ def test_assign_non_linear_phase_phenotypes():
     model = build_model(phenotyper_object, 5)
     data = {}
     filt = np.ones_like(model.times, dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
     left_time = model.times[left]
     right_time = model.times[right - 1]
 
@@ -251,7 +258,7 @@ def test_using_filter_for_phase_phenotypes_correctly():
     model = build_model(phenotyper_object, 1)
     data = {}
     filt = np.ones_like(model.times, dtype=bool)
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assert right - left == filt.sum(), "Error in segment location"
 
@@ -268,7 +275,7 @@ def test_using_filter_for_phase_phenotypes_correctly():
     filt[:20] = False
 
     data = {}
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assert right - left == filt.sum(), "Error in segment location"
 
@@ -286,7 +293,7 @@ def test_using_filter_for_phase_phenotypes_correctly():
     filt[-10:] = False
 
     data = {}
-    left, right = _locate_segment(filt)
+    left, right = locate_segment_bounds(filt)
 
     assert left == 20, "Bad filt start"
     assert right == filt.size - 10, "Bad filt end"
@@ -321,7 +328,7 @@ def test_phases_are_chronological_and_not_overlapping():
 
         assert (
             len(model.times) == len(model.phases)
-        ), "Inconsistency in number of phase positions for curve " + i
+        ), f"Inconsistency in number of phase positions for curve {i}"
 
         starts = np.array([
             phase[CurvePhasePhenotypes.Start]
@@ -329,7 +336,7 @@ def test_phases_are_chronological_and_not_overlapping():
         ])
 
         assert all(
-            np.diff(starts) > 0), "Non chronological phases for curve " + i
+            np.diff(starts) > 0), f"Non chronological phases for curve {i}"
 
         ends = np.array([
             phase[CurvePhasePhenotypes.Start]
@@ -338,7 +345,7 @@ def test_phases_are_chronological_and_not_overlapping():
         ])
 
         assert not any(
-            ends[:-1] - starts[1:] > 0), "Overlapping phases for curve " + 1
+            ends[:-1] - starts[1:] > 0), f"Overlapping phases for curve {i}"
 
 
 def test_segments():
@@ -353,5 +360,5 @@ def test_segments():
 
             pass
 
-        assert model.phases is not None, "Failed phases on curve " + i
-        assert len(model.phases) > 0, "Zero length phases on curve " + i
+        assert model.phases is not None, f"Failed phases on curve {i}"
+        assert len(model.phases) > 0, f"Zero length phases on curve {i}"

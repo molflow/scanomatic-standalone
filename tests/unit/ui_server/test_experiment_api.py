@@ -82,10 +82,9 @@ class TestFeatureExtractEndpoint:
         )
 
         assert test_app.rpc_client.create_feature_extract_job.called
-        assert test_app.rpc_client.create_feature_extract_job.called_with({
-            'try_keep_qc': True,
-            'analysis_directory': self.jailed_path('root/test/'),
-        })
+        payload = test_app.rpc_client.create_feature_extract_job.call_args.args[0]
+        assert payload['try_keep_qc'] is True
+        assert payload['analysis_directory'] == self.jailed_path('root/test/')
         assert response.status_code == 200
 
     @patch(
@@ -104,10 +103,9 @@ class TestFeatureExtractEndpoint:
         )
 
         assert test_app.rpc_client.create_feature_extract_job.called
-        assert test_app.rpc_client.create_feature_extract_job.called_with({
-            'try_keep_qc': False,
-            'analysis_directory': self.jailed_path('root/test/'),
-        })
+        payload = test_app.rpc_client.create_feature_extract_job.call_args.args[0]
+        assert payload['try_keep_qc'] is False
+        assert payload['analysis_directory'] == self.jailed_path('root/test/')
         assert response.status_code == 200
 
 

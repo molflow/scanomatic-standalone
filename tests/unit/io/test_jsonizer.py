@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from enum import Enum
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Type, Union
+from typing import Optional, Type, Union, cast
 
 import numpy as np
 import pytest
@@ -494,7 +494,7 @@ def test_purge_custom_equality(tmp_path):
         id="hello",
         content_model=AnalysisFeaturesFactory.create(),
     )
-    content_model: AnalysisFeatures = job.content_model
+    content_model: AnalysisFeatures = cast(AnalysisFeatures, job.content_model)
     other_job = RPC_Job_Model_Factory.create(id='other-id')
     # Rogue job with same id of different type shouldn't happen
     rogue_job = RPC_Job_Model_Factory.create(

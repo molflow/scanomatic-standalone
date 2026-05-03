@@ -3,8 +3,10 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import PlateEditorContainer from '../../ccc/containers/PlateEditorContainer';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
+
+const api = API;
 
 describe('<PlateEditorContainer />', () => {
   const props = {
@@ -41,7 +43,7 @@ describe('<PlateEditorContainer />', () => {
   describe('pre-processing', () => {
     it('should call SetGrayScaleTransform', () => {
       shallow(<PlateEditorContainer {...props} />);
-      expect(API.SetGrayScaleTransform)
+      expect(api.SetGrayScaleTransform)
         .toHaveBeenCalledWith(
           props.cccMetadata.id,
           props.imageId,
@@ -52,7 +54,7 @@ describe('<PlateEditorContainer />', () => {
 
     it('should switch to the gridding step when SetGrayScaleTransform finishes', (done) => {
       const promise = Promise.resolve({});
-      API.SetGrayScaleTransform.and.returnValue(promise);
+      api.SetGrayScaleTransform.and.returnValue(promise);
       const wrapper = shallow(<PlateEditorContainer {...props} />);
       promise.then(() => {
         wrapper.update();
@@ -64,12 +66,12 @@ describe('<PlateEditorContainer />', () => {
 
   describe('gridding', () => {
     beforeEach(() => {
-      API.SetGrayScaleTransform.and.returnValue({ then: (f) => f() });
+      api.SetGrayScaleTransform.and.returnValue({ then: (f) => f() });
     });
 
     it('should call SetGridding with offset 0,0', () => {
       shallow(<PlateEditorContainer {...props} />);
-      expect(API.SetGridding).toHaveBeenCalledWith(
+      expect(api.SetGridding).toHaveBeenCalledWith(
         props.cccMetadata.id,
         props.imageId,
         props.plateId,
@@ -87,10 +89,10 @@ describe('<PlateEditorContainer />', () => {
 
     it('should get a new grid using the offsets when onRegrid is called', () => {
       const wrapper = shallow(<PlateEditorContainer {...props} />);
-      API.SetGridding.calls.reset();
+      api.SetGridding.calls.reset();
       wrapper.setState({ rowOffset: 2, colOffset: 3 });
       wrapper.prop('onRegrid')();
-      expect(API.SetGridding).toHaveBeenCalledWith(
+      expect(api.SetGridding).toHaveBeenCalledWith(
         props.cccMetadata.id,
         props.imageId,
         props.plateId,
@@ -117,7 +119,7 @@ describe('<PlateEditorContainer />', () => {
     describe('on gridding error', () => {
       const errorData = { reason: 'bad', grid: [[[0]], [[0]]] };
       beforeEach(() => {
-        API.SetGridding.and.returnValue({ then: (f, g) => g(errorData) });
+        api.SetGridding.and.returnValue({ then: (f, g) => g(errorData) });
       });
 
       it('should set griddingLoading to false', () => {
@@ -142,7 +144,7 @@ describe('<PlateEditorContainer />', () => {
       const grid = [[[0]], [[0]]];
 
       beforeEach(() => {
-        API.SetGridding.and.returnValue({ then: (f) => f({ grid }) });
+        api.SetGridding.and.returnValue({ then: (f) => f({ grid }) });
       });
 
       it('should set griddingLoading to false', () => {

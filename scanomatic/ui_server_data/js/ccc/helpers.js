@@ -1,5 +1,7 @@
 import * as d3 from 'd3';
-import * as API from './api';
+import API from './api';
+
+const api = API;
 
 export class RGBColor {
   constructor(r, g, b) {
@@ -194,11 +196,11 @@ export function uploadImage(ccc, file, fixture, token, progress) {
   const markers = [];
   let imageId;
   progress(0, 5, 'Getting markers');
-  return API.GetMarkers(fixture, file).then((data) => {
+  return api.GetMarkers(fixture, file).then((data) => {
     markers[0] = data.markers.map((xy) => xy[0]);
     markers[1] = data.markers.map((xy) => xy[1]);
     progress(1, 5, 'Uploading image');
-    return API.GetImageId(ccc, file, token);
+    return api.GetImageId(ccc, file, token);
   }).then((data) => {
     imageId = data.image_identifier;
     const imageData = [
@@ -206,14 +208,30 @@ export function uploadImage(ccc, file, fixture, token, progress) {
       { key: 'marker_y', value: markers[1] },
     ];
     progress(2, 5, 'Setting image CCC data');
-    return API.SetCccImageData(ccc, imageId, token, imageData, fixture);
+    return api.SetCccImageData(ccc, imageId, token, imageData, fixture);
   }).then(() => {
     progress(3, 5, 'Slicing image');
-    return API.SetCccImageSlice(ccc, imageId, token);
+    return api.SetCccImageSlice(ccc, imageId, token);
   })
     .then(() => {
       progress(4, 5, 'Setting grayscale');
-      return API.SetGrayScaleImageAnalysis(ccc, imageId, token);
+      return api.SetGrayScaleImageAnalysis(ccc, imageId, token);
     })
     .then(() => imageId);
 }
+
+const helperExports = {
+  RGBColor,
+  featureColors,
+  valueFormatter,
+  getDataUrlfromUrl,
+  getLinearMapping,
+  hexToRgb,
+  createCanvasImage,
+  createCanvasMarker,
+  getMarkerData,
+  loadImage,
+  uploadImage,
+};
+
+export default helperExports;

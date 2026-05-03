@@ -4,12 +4,15 @@ import {
   uploadImage,
   valueFormatter,
 } from '../ccc/helpers';
-import testPlateImageURL from './fixtures/testPlate.png';
-import * as API from '../ccc/api';
+import API from '../ccc/api';
+
+const api = API;
+
+const tinyGifDataUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 describe('loadImage()', () => {
   it('should return a promise that resolves for a valid image URL', (done) => {
-    loadImage(testPlateImageURL).then(() => done());
+    loadImage(tinyGifDataUrl).then(() => done());
   });
 
   it('should return a promise that rejects for a bad image URL', (done) => {
@@ -44,7 +47,7 @@ describe('UploadImage', () => {
 
   it('should call GetMarkers', (done) => {
     uploadImage(...args).then(() => {
-      expect(API.GetMarkers).toHaveBeenCalledWith(fixture, file);
+      expect(api.GetMarkers).toHaveBeenCalledWith(fixture, file);
       done();
     });
   });
@@ -57,7 +60,7 @@ describe('UploadImage', () => {
   });
 
   it('should reject if GetMarkers rejects', (done) => {
-    API.GetMarkers
+    api.GetMarkers
       .and.callFake(() => Promise.reject(new Error('Whoopsie')));
     uploadImage(...args).catch((reason) => {
       expect(reason.message).toEqual('Whoopsie');
@@ -67,7 +70,7 @@ describe('UploadImage', () => {
 
   it('should call GetImageId', (done) => {
     uploadImage(...args).then(() => {
-      expect(API.GetImageId).toHaveBeenCalledWith(cccId, file, token);
+      expect(api.GetImageId).toHaveBeenCalledWith(cccId, file, token);
       done();
     });
   });
@@ -80,7 +83,7 @@ describe('UploadImage', () => {
   });
 
   it('should reject if GetImageId rejects', (done) => {
-    API.GetImageId
+    api.GetImageId
       .and.callFake(() => Promise.reject(new Error('Whoopsie')));
     uploadImage(...args).catch((reason) => {
       expect(reason.message).toEqual('Whoopsie');
@@ -94,7 +97,7 @@ describe('UploadImage', () => {
       { key: 'marker_y', value: [2, 4, 6] },
     ];
     uploadImage(...args).then(() => {
-      expect(API.SetCccImageData)
+      expect(api.SetCccImageData)
         .toHaveBeenCalledWith(cccId, imageId, token, data, fixture);
       done();
     });
@@ -108,7 +111,7 @@ describe('UploadImage', () => {
   });
 
   it('should reject if SetCccImageData rejects', (done) => {
-    API.SetCccImageData
+    api.SetCccImageData
       .and.callFake(() => Promise.reject(new Error('Whoopsie')));
     uploadImage(...args).catch((reason) => {
       expect(reason.message).toEqual('Whoopsie');
@@ -118,7 +121,7 @@ describe('UploadImage', () => {
 
   it('should call SetCccImageSlice', (done) => {
     uploadImage(...args).then(() => {
-      expect(API.SetCccImageSlice)
+      expect(api.SetCccImageSlice)
         .toHaveBeenCalledWith(cccId, imageId, token);
       done();
     });
@@ -132,7 +135,7 @@ describe('UploadImage', () => {
   });
 
   it('should reject if SetCccImageSlice rejects', (done) => {
-    API.SetCccImageSlice
+    api.SetCccImageSlice
       .and.callFake(() => Promise.reject(new Error('Whoopsie')));
     uploadImage(...args).catch((reason) => {
       expect(reason.message).toEqual('Whoopsie');
@@ -142,7 +145,7 @@ describe('UploadImage', () => {
 
   it('should call SetGrayScaleImageAnalysis', (done) => {
     uploadImage(...args).then(() => {
-      expect(API.SetGrayScaleImageAnalysis)
+      expect(api.SetGrayScaleImageAnalysis)
         .toHaveBeenCalledWith(cccId, imageId, token);
       done();
     });
@@ -156,7 +159,7 @@ describe('UploadImage', () => {
   });
 
   it('should reject if SetGrayScaleImageAnalysis rejects', (done) => {
-    API.SetGrayScaleImageAnalysis
+    api.SetGrayScaleImageAnalysis
       .and.callFake(() => Promise.reject(new Error('Whoopsie')));
     uploadImage(...args).catch((reason) => {
       expect(reason.message).toEqual('Whoopsie');

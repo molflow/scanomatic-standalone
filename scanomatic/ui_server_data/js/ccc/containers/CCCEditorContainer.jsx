@@ -1,9 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-import { GetFixturePlates } from '../api';
+import API from '../api';
 import CCCPropTypes from '../prop-types';
 import CCCEditor from '../components/CCCEditor';
+
+const api = API;
 
 export default class CCCEditorContainer extends React.Component {
   constructor(props) {
@@ -18,7 +20,7 @@ export default class CCCEditorContainer extends React.Component {
   }
 
   componentDidMount() {
-    GetFixturePlates(this.props.cccMetadata.fixtureName)
+    api.GetFixturePlates(this.props.cccMetadata.fixtureName)
       .then((plates) => {
         this.setState({ ready: true, platesPerImage: plates.length });
       });

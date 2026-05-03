@@ -560,6 +560,16 @@ def validate_polynomial(
     p_value: float,
     stderr: float,
 ) -> CalibrationValidation:
+    if not np.isfinite(slope) or not np.isfinite(p_value) or not np.isfinite(stderr):
+        _logger.error(
+            "Bad statistics for polynomial: slope={}, p_value={}, stderr={}".format(
+                slope,
+                p_value,
+                stderr,
+            ),
+        )
+        return CalibrationValidation.BadStatistics
+
     if abs(1.0 - slope) > 0.1:
         _logger.error("Bad slope for polynomial: {0}".format(slope))
         return CalibrationValidation.BadSlope
@@ -707,6 +717,18 @@ def construct_polynomial(identifier, power) -> Union[bool, dict[str, Any]]:
         data_store.target_value,
         calculated_sizes,
     )
+
+    # SciPy may return NaN statistics for degenerate inputs (e.g. constant
+    # calculated sizes). Historically this case yielded p_value ~= 1.0.
+    if not np.isfinite(p_value) and len(calculated_sizes) > 0:
+        if np.allclose(np.asarray(calculated_sizes), calculated_sizes[0]):
+            p_value = 1.0
+            if not np.isfinite(intercept):
+                intercept = float(calculated_sizes[0])
+            if not np.isfinite(slope):
+                slope = 0.0
+            if not np.isfinite(stderr):
+                stderr = 0.0
 
     validation = validate_polynomial(slope, p_value, stderr)
 

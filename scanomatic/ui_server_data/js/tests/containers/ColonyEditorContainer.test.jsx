@@ -4,7 +4,9 @@ import React from 'react';
 import '../components/enzyme-setup';
 import ColonyEditorContainer from '../../ccc/containers/ColonyEditorContainer';
 import colonyData from '../fixtures/colonyData.json';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
+
+const api = API;
 
 describe('</ColonyEditorContainer />', () => {
   const props = {
@@ -38,7 +40,7 @@ describe('</ColonyEditorContainer />', () => {
 
   it('should load the colony data from the api', () => {
     mount(<ColonyEditorContainer {...props} />);
-    expect(API.SetColonyDetection).toHaveBeenCalledWith(
+    expect(api.SetColonyDetection).toHaveBeenCalledWith(
       props.ccc,
       props.image,
       props.plateId,
@@ -53,7 +55,7 @@ describe('</ColonyEditorContainer />', () => {
   it('should reload data from the API when props are updated', () => {
     const wrapper = mount(<ColonyEditorContainer {...props} />);
     wrapper.setProps({ col: 2 });
-    expect(API.SetColonyDetection).toHaveBeenCalledWith(
+    expect(api.SetColonyDetection).toHaveBeenCalledWith(
       props.ccc,
       props.image,
       props.plateId,
@@ -111,7 +113,7 @@ describe('</ColonyEditorContainer />', () => {
     it('should not call the API if cell count not set', () => {
       const wrapper = mount(<ColonyEditorContainer {...props} />);
       wrapper.find('ColonyEditor').prop('onSet')();
-      expect(API.SetColonyCompression).not.toHaveBeenCalled();
+      expect(api.SetColonyCompression).not.toHaveBeenCalled();
     });
 
     it('should set cellCountError to true if cell count is not set', () => {
@@ -126,14 +128,14 @@ describe('</ColonyEditorContainer />', () => {
       wrapper.setState({ cellCount: -666 });
       wrapper.setState({ cellCountError: true });
       wrapper.find('ColonyEditor').prop('onSet')();
-      expect(API.SetColonyCompression).not.toHaveBeenCalled();
+      expect(api.SetColonyCompression).not.toHaveBeenCalled();
     });
 
     it('should send the data to the server', () => {
       const wrapper = mount(<ColonyEditorContainer {...props} />);
       wrapper.setState({ cellCount: 666 });
       wrapper.find('ColonyEditor').prop('onSet')();
-      expect(API.SetColonyCompression).toHaveBeenCalledWith(
+      expect(api.SetColonyCompression).toHaveBeenCalledWith(
         props.ccc,
         props.image,
         props.plateId,
@@ -148,7 +150,7 @@ describe('</ColonyEditorContainer />', () => {
     });
 
     it('should call the onFinish callback on success', () => {
-      API.SetColonyCompression
+      api.SetColonyCompression
         .and.callFake((
           ccc,
           image,
@@ -169,7 +171,7 @@ describe('</ColonyEditorContainer />', () => {
     });
 
     it('should show an alert on error', () => {
-      API.SetColonyCompression
+      api.SetColonyCompression
         .and.callFake((
           ccc,
           image,

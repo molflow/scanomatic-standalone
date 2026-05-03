@@ -176,6 +176,7 @@ class TestEditCCC:
         (0.89, 0.01, 0.001, calibration.CalibrationValidation.BadSlope),
         (0.99, 0.5, 0.001, calibration.CalibrationValidation.BadStatistics),
         (0.99, 0.01, 0.06, calibration.CalibrationValidation.BadStatistics),
+        (0.99, np.nan, 0.001, calibration.CalibrationValidation.BadStatistics),
     ))
     def test_validate_bad_correlation(self, slope, p_value, stderr, expected):
         assert calibration.validate_polynomial(

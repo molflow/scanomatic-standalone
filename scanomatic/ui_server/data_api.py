@@ -4,7 +4,7 @@ import shutil
 from collections.abc import Sequence
 from configparser import Error as ConfigError
 from enum import Enum
-from typing import Mapping
+from typing import Any, Mapping
 
 import numpy as np
 from flask import jsonify, request, send_from_directory
@@ -98,6 +98,41 @@ def json_data(data):
         return data
 
 
+def _normalize_reshape(value: Any) -> list[int] | tuple[int, ...] | None:
+    if value is None:
+        return None
+    if isinstance(value, tuple) and all(isinstance(v, int) for v in value):
+        return value
+    if isinstance(value, list) and all(isinstance(v, int) for v in value):
+        return value
+    return None
+
+
+def _as_area_sequence(value: Any) -> Sequence:
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return value
+    return ()
+
+
+def _as_markers_sequence(value: Any) -> Sequence:
+    if isinstance(value, Sequence) and not isinstance(value, (str, bytes)):
+        return value
+    if isinstance(value, str):
+        parsed = string_parse_2d_list(value)
+        if isinstance(parsed, Sequence):
+            return parsed
+    return ()
+
+
+def _phenotype_entry_to_json(value: Any) -> Any:
+    if value is None:
+        return None
+    to_json = getattr(value, "tojson", None)
+    if callable(to_json):
+        return to_json()
+    return json_data(value)
+
+
 def add_routes(app, rpc_client, is_debug_mode):
 
     """
@@ -181,11 +216,13 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         raw_growth_data = _validate_depth(raw_growth_data)
 
+        typed_settings = settings if isinstance(settings, Mapping) else {}
+
         state = phenotyper.Phenotyper(
             np.array(raw_growth_data),
             np.array(times_data),
             run_extraction=False,
-            **settings)
+            **typed_settings)
 
         if smooth_growth_data:
             smooth_growth_data = _validate_depth(smooth_growth_data)
@@ -193,7 +230,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         state.set_phenotype_inclusion_level(
             phenotyper.PhenotypeDataType[inclusion_level])
-        state.extract_phenotypes(resmoothen=len(smooth_growth_data) == 0)
+        state.extract_phenotypes()
 
         curve_segments = state.curve_segments
 
@@ -206,12 +243,12 @@ def add_routes(app, rpc_client, is_debug_mode):
                 smooth_growth_data=json_data(state.smooth_growth_data),
                 phenotypes={
                     pheno.name: [
-                        None if p is None else p.tojson()
+                        _phenotype_entry_to_json(p)
                         for p in state.get_phenotype(pheno)
                     ] for pheno in state.phenotypes
                 },
                 phenotypes_normed={
-                    pheno.name: [p.tojson() for p in state.get_phenotype(
+                    pheno.name: [_phenotype_entry_to_json(p) for p in state.get_phenotype(
                         pheno,
                         norm_state=NormState.NormalizedRelative,
                     )] for pheno in state.phenotypes_that_normalize
@@ -222,7 +259,7 @@ def add_routes(app, rpc_client, is_debug_mode):
             smooth_growth_data=json_data(state.smooth_growth_data),
             phenotypes={
                 pheno.name: [
-                    None if p is None else p.tojson()
+                    _phenotype_entry_to_json(p)
                     for p in state.get_phenotype(pheno)
                 ] for pheno in state.phenotypes
             },
@@ -280,7 +317,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None))
+            reshape=_normalize_reshape(data_object.get("shape", default=None)))
 
         grayscale_area_model = GrayScaleAreaModel(
             name=grayscale_name,
@@ -541,8 +578,8 @@ def add_routes(app, rpc_client, is_debug_mode):
                 reason="No valid json or post is empty",
             )
 
-        areas = data_object.get("areas")
-        markers = data_object.get("markers")
+        areas = _as_area_sequence(data_object.get("areas"))
+        markers = _as_markers_sequence(data_object.get("markers"))
         grayscale_name = data_object.get("grayscale_name")
 
         name = Paths().get_fixture_name(name)
@@ -744,6 +781,12 @@ def add_routes(app, rpc_client, is_debug_mode):
             save_fixture = True
 
         image = request.files.get('image')
+        if image is None or not image.filename:
+            return jsonify(
+                success=False,
+                is_endpoint=True,
+                reason="No image uploaded",
+            )
 
         name = os.path.basename(fixture_name)
         _, ext = os.path.splitext(image.filename)
@@ -842,7 +885,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None))
+            reshape=_normalize_reshape(data_object.get("shape", default=None)))
 
         grayscale_values = np.array(data_object.get("grayscale_values", []))
         grayscale_targets = np.array(data_object.get("grayscale_targets", []))
@@ -892,7 +935,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None))
+            reshape=_normalize_reshape(data_object.get("shape", default=None)))
 
         # first plate, upper left colony (just need something)
         identifier = ["unknown_image", 0, [0, 0]]
@@ -953,7 +996,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None),
+            reshape=_normalize_reshape(data_object.get("shape", default=None)),
         )
 
         # first plate, upper left colony (just need something
@@ -1015,7 +1058,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None),
+            reshape=_normalize_reshape(data_object.get("shape", default=None)),
         )
 
         background_filter = np.array(data_object.get("background_filter"))
@@ -1053,12 +1096,12 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         image = get_image_data_as_array(
             data_object.get("image", default=[[]]),
-            reshape=data_object.get("shape", default=None),
+            reshape=_normalize_reshape(data_object.get("shape", default=None)),
         )
 
         filt = get_image_data_as_array(
             data_object.get("filter", default=[[]]),
-            reshape=data_object.get("shape", default=None),
+            reshape=_normalize_reshape(data_object.get("shape", default=None)),
         )
 
         # first plate, upper left colony (just need something)

@@ -2,8 +2,10 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import ImageUpload from '../components/ImageUpload';
-import { uploadImage } from '../helpers';
+import helpers from '../helpers';
 import CCCPropTypes from '../prop-types';
+
+const helperApi = helpers;
 
 export default class ImageUploadContainer extends React.Component {
   constructor(props) {
@@ -18,7 +20,7 @@ export default class ImageUploadContainer extends React.Component {
     this.setState({ image });
     if (image) {
       const { id: cccId, fixtureName, accessToken } = this.props.cccMetadata;
-      uploadImage(cccId, image, fixtureName, accessToken, this.setProgress.bind(this))
+      helperApi.uploadImage(cccId, image, fixtureName, accessToken, this.setProgress.bind(this))
         .then(this.handleUploadSuccess)
         .catch(this.handleUploadError);
     }

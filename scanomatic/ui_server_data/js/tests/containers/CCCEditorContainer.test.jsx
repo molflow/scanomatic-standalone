@@ -3,9 +3,11 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import CCCEditorContainer from '../../ccc/containers/CCCEditorContainer';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
 import FakePromise from '../helpers/FakePromise';
+
+const api = API;
 
 describe('<CCCEditorContainer />', () => {
   const props = {
@@ -64,11 +66,11 @@ describe('<CCCEditorContainer />', () => {
 
   it('should load the number of plates from the API', () => {
     shallow(<CCCEditorContainer {...props} />);
-    expect(API.GetFixturePlates).toHaveBeenCalledWith('MyFixture');
+    expect(api.GetFixturePlates).toHaveBeenCalledWith('MyFixture');
   });
 
   it('should pass ready=true to <CCCEditor /> when GetFixturePlates resolves', () => {
-    API.GetFixturePlates.and.returnValue(FakePromise.resolve([{}, {}, {}]));
+    api.GetFixturePlates.and.returnValue(FakePromise.resolve([{}, {}, {}]));
     const wrapper = shallow(<CCCEditorContainer {...props} />);
     wrapper.update();
     expect(wrapper.find('CCCEditor').prop('ready')).toBeTruthy();
@@ -78,7 +80,7 @@ describe('<CCCEditorContainer />', () => {
     const oldPlate = { imageId: 'OldImg0', imageName: 'foo.tiff', plateId: 1 };
 
     beforeEach(() => {
-      API.GetFixturePlates.and.returnValue(FakePromise.resolve([{}, {}, {}]));
+      api.GetFixturePlates.and.returnValue(FakePromise.resolve([{}, {}, {}]));
     });
 
     it('should add new plates to the list', () => {

@@ -4,7 +4,6 @@ import os
 import scanomatic.io.paths as paths
 from scanomatic.io.jsonizer import dump, load_first
 from scanomatic.io.logger import get_logger
-from scanomatic.models.factories.scanning_factory import ScanningModelFactory
 from scanomatic.models.scanning_model import ScanningModel
 from scanomatic.models.validators.validate import validate
 
@@ -101,7 +100,8 @@ def rename_scan_instructions(new_name, old_name=None, **model_updates):
         os.rename(instructions, destination)
         m: ScanningModel = load_first(destination)
         m.project_name = new_name
-        ScanningModelFactory.update(m, **model_updates)
+        for key, value in model_updates.items():
+            setattr(m, key, value)
         if validate(m):
             dump(
                 m,

@@ -84,7 +84,7 @@ class TestFixtureImage:
         prev_img = np.zeros(0)
         fixture_image._img = prev_img
         fixture_image.load_new_image(image_path)
-        assert fixture_image._img != prev_img
+        assert not np.array_equal(fixture_image._img, prev_img)
 
     def test_load_new_image_raises(self, fixture_image: FixtureImage):
         with pytest.raises(FixtureImageError) as err:

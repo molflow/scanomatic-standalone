@@ -3,8 +3,10 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import PolynomialConstructionContainer from '../../ccc/containers/PolynomialConstructionContainer';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
+
+const api = API;
 
 describe('<PolynomialConstructionContainer />', () => {
   const onFinalizeCCC = jasmine.createSpy('onFinalizeCCC');
@@ -104,7 +106,7 @@ describe('<PolynomialConstructionContainer />', () => {
     const wrapper = shallow(<PolynomialConstructionContainer {...props} />);
     const poly = wrapper.find('PolynomialConstruction');
     poly.prop('onConstruction')();
-    expect(API.SetNewCalibrationPolynomial).toHaveBeenCalledWith(
+    expect(api.SetNewCalibrationPolynomial).toHaveBeenCalledWith(
       props.cccMetadata.id,
       5,
       props.cccMetadata.accessToken,
@@ -115,7 +117,7 @@ describe('<PolynomialConstructionContainer />', () => {
     const wrapper = shallow(<PolynomialConstructionContainer {...props} />);
     wrapper.prop('onDegreeOfPolynomialChange')({ target: { value: '42' } });
     wrapper.prop('onConstruction')();
-    expect(API.SetNewCalibrationPolynomial)
+    expect(api.SetNewCalibrationPolynomial)
       .toHaveBeenCalledWith(props.cccMetadata.id, 42, props.cccMetadata.accessToken);
   });
 
@@ -123,7 +125,7 @@ describe('<PolynomialConstructionContainer />', () => {
     const wrapper = shallow(<PolynomialConstructionContainer {...props} />);
     const poly = wrapper.find('PolynomialConstruction');
     const promise = Promise.resolve(results);
-    API.SetNewCalibrationPolynomial.and.returnValue(promise);
+    api.SetNewCalibrationPolynomial.and.returnValue(promise);
     wrapper.setState({ error: 'test' });
     poly.prop('onConstruction')()
       .then(() => {
@@ -136,7 +138,7 @@ describe('<PolynomialConstructionContainer />', () => {
     const wrapper = shallow(<PolynomialConstructionContainer {...props} />);
     const poly = wrapper.find('PolynomialConstruction');
     const promise = Promise.resolve(results);
-    API.SetNewCalibrationPolynomial.and.returnValue(promise);
+    api.SetNewCalibrationPolynomial.and.returnValue(promise);
     poly.prop('onConstruction')();
     promise.then(() => {
       expect(wrapper.state('polynomial'))
@@ -159,7 +161,7 @@ describe('<PolynomialConstructionContainer />', () => {
     const wrapper = shallow(<PolynomialConstructionContainer {...props} />);
     const poly = wrapper.find('PolynomialConstruction');
     const promise = Promise.reject(new Error('foo'));
-    API.SetNewCalibrationPolynomial.and.returnValue(promise);
+    api.SetNewCalibrationPolynomial.and.returnValue(promise);
     poly.prop('onConstruction')()
       .then(() => {
         expect(wrapper.state('error')).toEqual('foo');

@@ -3,8 +3,10 @@ import React from 'react';
 
 import '../components/enzyme-setup';
 import CCCInitializationContainer from '../../ccc/containers/CCCInitializationContainer';
-import * as API from '../../ccc/api';
+import API from '../../ccc/api';
 import FakePromise from '../helpers/FakePromise';
+
+const api = API;
 
 describe('<CCCInitializationContainer />', () => {
   const onInitialize = jasmine.createSpy('onInitialize');
@@ -55,17 +57,17 @@ describe('<CCCInitializationContainer />', () => {
 
   it('should get the list of fixtures', () => {
     shallow(<CCCInitializationContainer {...props} />);
-    expect(API.GetFixtures).toHaveBeenCalledWith();
+    expect(api.GetFixtures).toHaveBeenCalledWith();
   });
 
   it('should set the error prop if getting fixtures fails', () => {
-    API.GetFixtures.and.returnValue(FakePromise.reject('Wibbly'));
+    api.GetFixtures.and.returnValue(FakePromise.reject('Wibbly'));
     shallow(<CCCInitializationContainer {...props} />);
     expect(onError).toHaveBeenCalledWith('Error getting fixtures: Wibbly');
   });
 
   it('should set the error prop if there is no fixtures', () => {
-    API.GetFixtures.and.returnValue(FakePromise.resolve([]));
+    api.GetFixtures.and.returnValue(FakePromise.resolve([]));
     shallow(<CCCInitializationContainer {...props} />);
     expect(onError)
       .toHaveBeenCalledWith('You need to setup a fixture first.');
@@ -73,11 +75,11 @@ describe('<CCCInitializationContainer />', () => {
 
   it('should request the list of pinning formats', () => {
     shallow(<CCCInitializationContainer {...props} />);
-    expect(API.GetPinningFormats).toHaveBeenCalledWith();
+    expect(api.GetPinningFormats).toHaveBeenCalledWith();
   });
 
   it('should set the error prop if getting pinning formats fails', () => {
-    API.GetPinningFormats.and.returnValue(FakePromise.reject('Wobbly'));
+    api.GetPinningFormats.and.returnValue(FakePromise.reject('Wobbly'));
     shallow(<CCCInitializationContainer {...props} />);
     expect(onError)
       .toHaveBeenCalledWith('Error getting pinning formats: Wobbly');
@@ -91,8 +93,8 @@ describe('<CCCInitializationContainer />', () => {
     ];
 
     beforeEach(() => {
-      API.GetFixtures.and.returnValue(FakePromise.resolve(fixtureNames));
-      API.GetPinningFormats.and.returnValue(FakePromise.resolve(pinningFormats));
+      api.GetFixtures.and.returnValue(FakePromise.resolve(fixtureNames));
+      api.GetPinningFormats.and.returnValue(FakePromise.resolve(pinningFormats));
     });
 
     it('should populate the availabe pinning format names', () => {

@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from typing import Any, Optional, SupportsFloat, SupportsInt, Union, cast
 
-import matplotlib.pyplot as plt  # type: ignore
+import matplotlib.pyplot as plt
 import numpy as np
 
 from scanomatic.io.logger import get_logger
@@ -127,7 +127,7 @@ def loadCSV2Numpy(
                 dtype=dtype,
             )
 
-            if dtype == float:
+            if dtype is float:
                 plate *= np.nan
 
             data.append(plate)

@@ -4,11 +4,12 @@ import { mount } from 'enzyme';
 import './enzyme-setup';
 import Plate from '../../ccc/components/Plate';
 import { loadImage } from '../../ccc/helpers';
-import expectedPlateImage from '../fixtures/expectedPlate.png';
-import expectedGriddedPlateImage from '../fixtures/expectedGriddedPlate.png';
-import expectedGriddedPlateSelectFirstImage from '../fixtures/expectedGriddedPlateSelectFirst.png';
-import expectedGriddedPlateSelectSecondImage from '../fixtures/expectedGriddedPlateSelectSecond.png';
-import testPlateImage from '../fixtures/testPlate.png';
+
+const expectedPlateImage = '/base/js/tests/fixtures/expectedPlate.png';
+const expectedGriddedPlateImage = '/base/js/tests/fixtures/expectedGriddedPlate.png';
+const expectedGriddedPlateSelectFirstImage = '/base/js/tests/fixtures/expectedGriddedPlateSelectFirst.png';
+const expectedGriddedPlateSelectSecondImage = '/base/js/tests/fixtures/expectedGriddedPlateSelectSecond.png';
+const testPlateImage = '/base/js/tests/fixtures/testPlate.png';
 
 const toLookLikeImage = (util, customEqualityTesters) => ({
   compare: (actual, expected) => {

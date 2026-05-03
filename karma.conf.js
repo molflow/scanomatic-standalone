@@ -1,18 +1,33 @@
 const webpackConfig = require('./webpack.config');
 
 module.exports = (config) => {
+  const karmaWebpackConfig = {
+    ...webpackConfig,
+    // Test bundles should not be production-minified; Enzyme relies on readable component identities.
+    mode: 'development',
+    output: {
+      ...(webpackConfig.output || {}),
+      // Karma serves compiled assets under /base/.
+      publicPath: '/base/',
+    },
+    optimization: {
+      ...(webpackConfig.optimization || {}),
+      minimize: false,
+    },
+  };
+
   config.set({
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: 'scanomatic/ui_server_data/',
 
     // frameworks to use
     // available frameworks: https://npmjs.org/browse/keyword/karma-adapter
-    frameworks: ['jasmine'],
+    frameworks: ['jasmine', 'webpack'],
 
     // list of files / patterns to load in the browser
     files: [
-      'js/somlib/som.js',
       { pattern: 'js/tests/**/*.test.@(js|jsx)', watched: false },
+      { pattern: 'js/tests/fixtures/**/*.png', watched: false, included: false, served: true },
     ],
 
     // list of files to exclude
@@ -62,7 +77,14 @@ module.exports = (config) => {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['ChromeHeadless'],
+    browsers: ['ChromeHeadlessNoSandbox'],
+
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      },
+    },
 
     browserNoActivityTimeout: 30000,
 
@@ -74,6 +96,6 @@ module.exports = (config) => {
     // how many browser should be started simultaneous
     concurrency: Infinity,
 
-    webpack: webpackConfig,
+    webpack: karmaWebpackConfig,
   });
 };
