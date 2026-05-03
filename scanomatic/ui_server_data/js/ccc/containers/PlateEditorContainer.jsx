@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import PlateEditor from '../components/PlateEditor';
-import API from '../api';
+import * as API from '../api';
 import CCCPropTypes from '../prop-types';
 
 export default class PlateEditorContainer extends React.Component {

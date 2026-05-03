@@ -3,7 +3,7 @@ import React from 'react';
 
 import '../components/enzyme-setup';
 import CCCInitializationContainer from '../../ccc/containers/CCCInitializationContainer';
-import API from '../../ccc/api';
+import * as API from '../../ccc/api';
 import FakePromise from '../helpers/FakePromise';
 
 describe('<CCCInitializationContainer />', () => {

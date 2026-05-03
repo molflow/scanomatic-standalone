@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import PlateEditorContainer from '../../ccc/containers/PlateEditorContainer';
-import API from '../../ccc/api';
+import * as API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
 
 describe('<PlateEditorContainer />', () => {

@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import ImageUpload from '../components/ImageUpload';
-import helpers from '../helpers';
+import * as helpers from '../helpers';
 import CCCPropTypes from '../prop-types';
 
 export default class ImageUploadContainer extends React.Component {

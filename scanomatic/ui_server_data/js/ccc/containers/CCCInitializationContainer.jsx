@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import CCCInitialization from '../components/CCCInitialization';
-import API from '../api';
+import * as API from '../api';
 
 export default class CCCInitializationContainer extends React.Component {
   constructor(props) {

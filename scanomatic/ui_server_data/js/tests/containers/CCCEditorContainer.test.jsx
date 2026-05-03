@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 
 import '../components/enzyme-setup';
 import CCCEditorContainer from '../../ccc/containers/CCCEditorContainer';
-import API from '../../ccc/api';
+import * as API from '../../ccc/api';
 import cccMetadata from '../fixtures/cccMetadata';
 import FakePromise from '../helpers/FakePromise';
 

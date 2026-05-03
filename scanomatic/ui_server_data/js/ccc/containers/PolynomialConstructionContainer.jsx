@@ -3,7 +3,7 @@ import React from 'react';
 
 import PolynomialConstruction from '../components/PolynomialConstruction';
 
-import API from '../api';
+import * as API from '../api';
 import CCCPropTypes from '../prop-types';
 
 export default class PolynomialConstructionContainer extends React.Component {

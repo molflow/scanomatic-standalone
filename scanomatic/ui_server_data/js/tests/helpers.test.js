@@ -4,7 +4,7 @@ import {
   uploadImage,
   valueFormatter,
 } from '../ccc/helpers';
-import API from '../ccc/api';
+import * as API from '../ccc/api';
 
 const tinyGifDataUrl = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 

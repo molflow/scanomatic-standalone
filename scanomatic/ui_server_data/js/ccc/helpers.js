@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import API from './api';
+import * as API from './api';
 
 export class RGBColor {
   constructor(r, g, b) {
