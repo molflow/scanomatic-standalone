@@ -135,9 +135,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: Run headless system test
-        uses: GabrielBB/xvfb-action@v1
-        with:
-          run: uvx --with tox-uv tox -e system
+        run: xvfb-run -a uvx --with tox-uv tox -e system
 
   docker-build:
     runs-on: ubuntu-24.04
