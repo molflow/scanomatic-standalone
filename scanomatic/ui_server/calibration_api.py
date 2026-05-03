@@ -204,7 +204,7 @@ def set_ccc_image_data(ccc_identifier, image_identifier):
 
             if data_type is calibration.CCCImage.fixture and \
                     calibration.CCCImage.grayscale_name.name not in \
-                    list(data_object.keys()):
+                    list(data_object.keys()) and isinstance(val, str):
 
                 fixture_settings = Fixtures()[val]
                 if fixture_settings is not None:

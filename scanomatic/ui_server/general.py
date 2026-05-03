@@ -6,12 +6,13 @@ import zipfile
 from collections.abc import Sequence
 from io import BytesIO, IOBase
 from itertools import chain
-from typing import Optional, Union
+from typing import IO, Any, Optional, Union, cast
 from urllib.parse import quote, unquote
 
 import numpy as np
 from flask import jsonify, render_template, send_file
 from PIL import Image
+from numpy.typing import NDArray
 from werkzeug.datastructures import FileStorage
 
 from scanomatic.image_analysis.first_pass_image import FixtureImage
@@ -148,7 +149,7 @@ def get_area_too_large_for_grayscale(
 def get_grayscale_is_valid(values, grayscale: Grayscale):
     if values is None:
         return False
-    return is_valid_grayscale(grayscale.targets, values)
+    return is_valid_grayscale(grayscale.targets, np.asarray(values))
 
 
 def usable_plates(plates):
@@ -353,7 +354,7 @@ def serve_zip_file(zip_name, *file_list):
     )
 
 
-def serve_pil_image(pil_img: Image):
+def serve_pil_image(pil_img: Image.Image):
     img_io = BytesIO()
     pil_img.save(img_io, 'JPEG', quality=70)
     img_io.seek(0)
@@ -403,9 +404,9 @@ def remove_pad_decode_base64(data: Union[bytes, str]) -> bytes:
 
 
 def get_image_data_as_array(
-    image_data: Union[list, IOBase, FileStorage, str, np.array],
+    image_data: Union[list[Any], IOBase, FileStorage, str, NDArray[Any]],
     reshape: Optional[Union[list[int], tuple[int, ...]]] = None,
-) -> np.array:
+) -> NDArray[Any]:
     if isinstance(image_data, str):
         stream = BytesIO()
         stream.write(image_data.encode())
@@ -432,7 +433,8 @@ def get_image_data_as_array(
         isinstance(image_data, IOBase)
         or isinstance(image_data, FileStorage)
     ):
-        return np.array(Image.open(image_data))
+        stream = image_data.stream if isinstance(image_data, FileStorage) else image_data
+        return np.array(Image.open(cast(IO[bytes], stream)))
 
     else:
         return image_data
@@ -490,7 +492,7 @@ def usable_markers(markers, image):
 
 def split_areas_into_grayscale_and_plates(
     areas: Sequence,
-) -> tuple[GrayScaleAreaModel, list[FixturePlateModel]]:
+) -> tuple[Optional[GrayScaleAreaModel], list[FixturePlateModel]]:
     gs = None
     plates = []
     for area in areas:
