@@ -3,8 +3,10 @@ import React from 'react';
 
 import PolynomialConstruction from '../components/PolynomialConstruction';
 
-import * as API from '../api';
+import API from '../api';
 import CCCPropTypes from '../prop-types';
+
+const api = API;
 
 export default class PolynomialConstructionContainer extends React.Component {
   constructor(props) {
@@ -28,7 +30,7 @@ export default class PolynomialConstructionContainer extends React.Component {
   handleConstruction() {
     const { id, accessToken } = this.props.cccMetadata;
     const { degreeOfPolynomial } = this.state;
-    return API.SetNewCalibrationPolynomial(id, degreeOfPolynomial, accessToken)
+    return api.SetNewCalibrationPolynomial(id, degreeOfPolynomial, accessToken)
       .then(this.handleConstructionResults)
       .catch(this.handleConstructionResultsError);
   }

@@ -2,7 +2,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import CCCInitialization from '../components/CCCInitialization';
-import * as API from '../api';
+import API from '../api';
+
+const api = API;
 
 export default class CCCInitializationContainer extends React.Component {
   constructor(props) {
@@ -23,11 +25,11 @@ export default class CCCInitializationContainer extends React.Component {
   }
 
   componentDidMount() {
-    API.GetFixtures().then(
+    api.GetFixtures().then(
       this.handleGetFixturesSuccess.bind(this),
       this.setError.bind(this, 'Error getting fixtures'),
     );
-    API.GetPinningFormats().then(
+    api.GetPinningFormats().then(
       this.handleGetPinningFormatsSuccess.bind(this),
       this.setError.bind(this, 'Error getting pinning formats'),
     );

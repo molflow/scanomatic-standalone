@@ -2,7 +2,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import ColonyEditor from '../components/ColonyEditor';
-import * as API from '../api';
+import API from '../api';
+
+const api = API;
 
 export default class ColonyEditorContainer extends React.Component {
   constructor(props) {
@@ -64,7 +66,7 @@ export default class ColonyEditorContainer extends React.Component {
       ccc, image, plateId, row, col, accessToken,
     } = this.props;
     const { cellCount, colonyData } = this.state;
-    API.SetColonyCompression(
+    api.SetColonyCompression(
       ccc,
       image,
       plateId,
@@ -87,7 +89,7 @@ export default class ColonyEditorContainer extends React.Component {
   getColonyData({
     ccc, image, plateId, row, col, accessToken,
   }) {
-    API.SetColonyDetection(
+    api.SetColonyDetection(
       ccc,
       image,
       plateId,
