@@ -63,10 +63,12 @@ def test_setup_copies_scan_pinning_formats_to_compile_model(tmp_path, monkeypatc
     effector = ScannerEffector(job)
 
     effector.setup(dumps(job))
+    compile_model = effector._scanning_effector_data.compile_project_model
+
+    assert compile_model is not None
 
     assert (
-        effector._scanning_effector_data.compile_project_model
-        .overwrite_pinning_matrices
+        compile_model.overwrite_pinning_matrices
         == pinning_formats
     )
 
@@ -99,6 +101,9 @@ def test_compile_request_payload_contains_scan_pinning_formats(
     assert (
         fake_rpc_client.payloads[0]["overwrite_pinning_matrices"]
         == pinning_formats
+    )
+    assert (
+        effector._scanning_effector_data.compile_project_model is not None
     )
     assert (
         effector._scanning_effector_data.compile_project_model.start_condition

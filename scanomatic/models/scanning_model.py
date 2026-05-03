@@ -277,7 +277,7 @@ class ScanningModelEffectorData(model.Model):
         *,
         current_cycle_step: SCAN_CYCLE = SCAN_CYCLE.Wait,
         current_step_start_time: float = -1,
-        current_image: int = -1,
+        current_image: Optional[int] = -1,
         current_image_path: str = "",
         current_image_path_pattern: str = "",
         previous_scan_cycle_start: float = -1.0,
@@ -287,7 +287,7 @@ class ScanningModelEffectorData(model.Model):
         usb_port: str = "",
         scanning_thread=None,
         scan_success: bool = False,
-        compile_project_model: CompileInstructionsModel,
+        compile_project_model: Optional[CompileInstructionsModel] = None,
         known_file_size=0,
         warned_file_size: bool = False,
         warned_scanner_error: bool = False,
@@ -299,7 +299,7 @@ class ScanningModelEffectorData(model.Model):
     ):
         self.current_cycle_step: SCAN_CYCLE = current_cycle_step
         self.current_step_start_time: float = current_step_start_time
-        self.current_image: int = current_image
+        self.current_image: Optional[int] = current_image
         self.current_image_path: str = current_image_path
         self.current_image_path_pattern: str = current_image_path_pattern
         self.previous_scan_cycle_start: float = previous_scan_cycle_start
