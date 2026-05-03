@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 
 import PlateEditor from '../components/PlateEditor';
-import { SetGrayScaleTransform, SetGridding } from '../api';
+import * as API from '../api';
 import CCCPropTypes from '../prop-types';
 
 export default class PlateEditorContainer extends React.Component {
@@ -23,7 +23,7 @@ export default class PlateEditorContainer extends React.Component {
 
   componentDidMount() {
     const { cccMetadata: { id: cccId, accessToken }, imageId, plateId } = this.props;
-    SetGrayScaleTransform(cccId, imageId, plateId, accessToken)
+    API.SetGrayScaleTransform(cccId, imageId, plateId, accessToken)
       .then(this.handleSetGrayScaleTransformSuccess.bind(this));
   }
 
@@ -33,7 +33,7 @@ export default class PlateEditorContainer extends React.Component {
       this.props.cccMetadata.pinningFormat.nCols,
       this.props.cccMetadata.pinningFormat.nRows,
     ];
-    SetGridding(
+    API.SetGridding(
       this.props.cccMetadata.id,
       this.props.imageId,
       this.props.plateId,
@@ -60,7 +60,7 @@ export default class PlateEditorContainer extends React.Component {
       this.props.cccMetadata.pinningFormat.nCols,
       this.props.cccMetadata.pinningFormat.nRows,
     ];
-    SetGridding(
+    API.SetGridding(
       this.props.cccMetadata.id,
       this.props.imageId,
       this.props.plateId,

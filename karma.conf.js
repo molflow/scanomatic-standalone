@@ -11,7 +11,6 @@ module.exports = (config) => {
 
     // list of files / patterns to load in the browser
     files: [
-      'js/somlib/som.js',
       { pattern: 'js/tests/**/*.test.@(js|jsx)', watched: false },
     ],
 

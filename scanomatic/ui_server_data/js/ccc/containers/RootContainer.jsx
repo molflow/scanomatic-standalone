@@ -1,7 +1,7 @@
 import React from 'react';
 
 import Root from '../components/Root';
-import { InitiateCCC, finalizeCalibration } from '../api';
+import * as API from '../api';
 
 export default class RootContainer extends React.Component {
   constructor(props) {
@@ -17,7 +17,7 @@ export default class RootContainer extends React.Component {
   }
 
   handleInitializeCCC(species, reference, fixtureName, pinningFormat) {
-    InitiateCCC(species, reference).then(
+    API.InitiateCCC(species, reference).then(
       ({ identifier: id, access_token: accessToken }) => this.setState({
         error: null,
         cccMetadata: {
@@ -33,7 +33,7 @@ export default class RootContainer extends React.Component {
   handleFinalizeCCC() {
     const { cccMetadata } = this.state;
     const { id, accessToken } = cccMetadata;
-    finalizeCalibration(id, accessToken).then(
+    API.finalizeCalibration(id, accessToken).then(
       () => this.setState({ error: null, finalized: true }),
       (reason) => this.setState({
         error: `Finalization error: ${reason}`,
