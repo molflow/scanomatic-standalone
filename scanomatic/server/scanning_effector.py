@@ -1,7 +1,7 @@
 import os
 import time
 from threading import Thread
-from typing import Any, Optional, Union, cast
+from typing import Any, Optional, cast
 
 from scanomatic.io import rpc_client
 from scanomatic.io import paths, sane, scanner_manager
