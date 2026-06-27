@@ -3,7 +3,6 @@ import os
 import shutil
 from collections.abc import Sequence
 from configparser import Error as ConfigError
-from enum import Enum
 from typing import Any, Mapping
 
 import numpy as np
@@ -40,6 +39,7 @@ from scanomatic.models.factories.fixture_factories import (
 )
 from scanomatic.models.fixture_models import GrayScaleAreaModel
 from scanomatic.models.validators.validate import validate
+from scanomatic.ui_server.json_safety import sanitize_json_numbers
 
 from .general import (
     convert_path_to_url,
@@ -82,20 +82,7 @@ def _validate_depth(data):
     return data
 
 
-def json_data(data):
-
-    if data is None:
-        return None
-    elif hasattr(data, "tolist"):
-        return json_data(data.tolist())
-    elif isinstance(data, Sequence):
-        return [json_data(d) for d in data]
-    elif isinstance(data, Mapping):
-        return {json_data(k): json_data(data[k]) for k in data}
-    elif isinstance(data, Enum):
-        return data.name
-    else:
-        return data
+json_data = sanitize_json_numbers
 
 
 def _normalize_reshape(value: Any) -> list[int] | tuple[int, ...] | None:
@@ -434,15 +421,12 @@ def add_routes(app, rpc_client, is_debug_mode):
             "success" if could be obtained and if not "reason" to explain why.
 
         """
-
+        fixtures = Fixtures().get_names()
         if rpc_client.online:
-            return jsonify(fixtures=rpc_client.get_fixtures(), success=True)
-        else:
-            return jsonify(
-                fixtures=[],
-                success=False,
-                reason="Scan-o-Matic server offline",
-            )
+            # Keep online behaviour while still guaranteeing a local fallback.
+            fixtures = tuple(rpc_client.get_fixtures())
+
+        return jsonify(fixtures=fixtures, success=True)
 
     @app.route("/api/data/fixture/local/<path:project>")
     @app.route("/api/data/fixture/local")
@@ -487,12 +471,11 @@ def add_routes(app, rpc_client, is_debug_mode):
             "reason" to explain why not.
 
         """
-        if not rpc_client.online:
-            return jsonify(
-                success=False,
-                reason="Scan-o-Matic server offline",
-            )
-        elif name in rpc_client.get_fixtures():
+        fixtures = Fixtures().get_names()
+        if rpc_client.online:
+            fixtures = tuple(rpc_client.get_fixtures())
+
+        if name in fixtures:
             path = Paths().get_fixture_path(name)
             try:
                 fixture = load_first(path)
@@ -742,9 +725,9 @@ def add_routes(app, rpc_client, is_debug_mode):
                     y2=plate.y2,
                     data=(
                         None if image.size == 0 else
-                        image[
+                        json_data(image[
                             plate.y1: plate.y2,
-                            plate.x1: plate.y2].tolist()),
+                            plate.x1: plate.y2].tolist())),
                     shape=[plate.y2 - plate.y1, plate.x2 - plate.x1]
                 )
                 for plate in current_settings.model.plates
@@ -754,11 +737,11 @@ def add_routes(app, rpc_client, is_debug_mode):
                 x2=current_settings.model.grayscale.x2,
                 y1=current_settings.model.grayscale.y1,
                 y2=current_settings.model.grayscale.y2,
-                data=None if image.size == 0 else image[
+                data=None if image.size == 0 else json_data(image[
                     current_settings.model.grayscale.y1:
                     current_settings.model.grayscale.y2,
                     current_settings.model.grayscale.x1:
-                    current_settings.model.grayscale.y2].tolist(),
+                    current_settings.model.grayscale.y2].tolist()),
 
                 shape=[
                     current_settings.model.grayscale.y2 -
@@ -902,7 +885,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         return jsonify(
             success=True,
-            image=transpose_polynomial(image).tolist(),
+            image=json_data(transpose_polynomial(image)),
             exits=["detect_colony"],
             detect_colony=["/api/data/image/detect/colony"],
         )
@@ -958,10 +941,10 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         return jsonify(
             success=True,
-            blob=gc.get_item(COMPARTMENTS.Blob).filter_array.tolist(),
-            background=gc.get_item(
+            blob=json_data(gc.get_item(COMPARTMENTS.Blob).filter_array),
+            background=json_data(gc.get_item(
                 COMPARTMENTS.Background,
-            ).filter_array.tolist(),
+            ).filter_array),
             exits=['transform_cells', 'analyse_compartment'],
             transform_cells=['/api/data/image/transform/cells'],
             analyse_compartment=[
@@ -1020,10 +1003,10 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         return jsonify(
             success=True,
-            blob=gc.get_item(COMPARTMENTS.Blob).filter_array.tolist(),
-            background=gc.get_item(
+            blob=json_data(gc.get_item(COMPARTMENTS.Blob).filter_array),
+            background=json_data(gc.get_item(
                 COMPARTMENTS.Background,
-            ).filter_array.tolist(),
+            ).filter_array),
             features=json_data(
                 AnalysisFeaturesFactory.deep_to_dict(gc.features)
             ),
@@ -1080,7 +1063,7 @@ def add_routes(app, rpc_client, is_debug_mode):
 
         return jsonify(
             success=True,
-            image=gc.source.tolist(),
+            image=json_data(gc.source),
             exits=['analyse_compartment'],
             analyse_compartment=[
                 '/api/data/image/analyse/compartment/{0}'.format(c)

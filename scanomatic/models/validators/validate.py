@@ -48,7 +48,12 @@ def _get_validation_results(model: Model) -> ValidationResults:
         else:
             if len(sub_validation) == 2:
                 outer_type, leaf_type = cast(tuple[Type, Type], sub_validation)
-                if not isinstance(item, outer_type):
+                # Model constructors may normalize tuple-backed sequences to
+                # list, so accept list where tuple is declared.
+                is_compatible_sequence = (
+                    outer_type is tuple and isinstance(item, list)
+                )
+                if not isinstance(item, outer_type) and not is_compatible_sequence:
                     yield _produce_validation_error(fields, k)
                 else:
                     if isinstance(leaf_type, dict):

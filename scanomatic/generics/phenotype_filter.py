@@ -86,7 +86,10 @@ class FilterArray:
             val = self.filled()
         else:
             val = self.data
-        filt = np.isnan(val)
+
+        # JSON has no representation for +/-Infinity or NaN.
+        # Convert any non-finite float to null before list conversion.
+        filt = ~np.isfinite(val)
         val = val.astype(object)
         val[filt] = None
         return val.tolist()

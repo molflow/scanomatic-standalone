@@ -17,6 +17,7 @@ from scanomatic.io.fixtures import Fixtures
 from scanomatic.io.paths import Paths
 from scanomatic.models.analysis_model import COMPARTMENTS
 from scanomatic.models.factories.analysis_factories import AnalysisModelFactory
+from scanomatic.ui_server.json_safety import sanitize_json_numbers
 
 from .general import (
     get_grayscale_is_valid,
@@ -494,9 +495,9 @@ def grid_ccc_image_plate(ccc_identifier, image_identifier, plate):
         )
 
     return jsonify(
-        grid=grid_array.grid,
-        xy1=xy1,
-        xy2=xy2
+        grid=sanitize_json_numbers(grid_array.grid),
+        xy1=sanitize_json_numbers(xy1),
+        xy2=sanitize_json_numbers(xy2)
     )
 
 
@@ -582,17 +583,17 @@ def detect_colony(ccc_identifier, image_identifier, plate, x, y):
     background_reasonable = background.sum() >= 20
 
     return jsonify(
-        blob=blob.tolist(),
-        background=background.tolist(),
-        image=grid_cell.source.tolist(),
-        image_max=grid_cell.source.max(),
-        image_min=grid_cell.source.min(),
-        blob_max=blob_pixels.max() if blob_exists else -1,
-        blob_min=blob_pixels.min() if blob_exists else -1,
+        blob=sanitize_json_numbers(blob.tolist()),
+        background=sanitize_json_numbers(background.tolist()),
+        image=sanitize_json_numbers(grid_cell.source.tolist()),
+        image_max=sanitize_json_numbers(grid_cell.source.max()),
+        image_min=sanitize_json_numbers(grid_cell.source.min()),
+        blob_max=sanitize_json_numbers(blob_pixels.max() if blob_exists else -1),
+        blob_min=sanitize_json_numbers(blob_pixels.min() if blob_exists else -1),
         blob_exists=int(blob_exists),
         background_exists=int(background_exists),
         background_reasonable=int(background_reasonable),
-        grid_position=box['center'],
+        grid_position=sanitize_json_numbers(box['center']),
     )
 
 

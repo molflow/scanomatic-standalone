@@ -28,6 +28,7 @@ from scanomatic.data_processing.project import (
 from scanomatic.generics.phenotype_filter import Filter
 from scanomatic.io.app_config import Config
 from scanomatic.io.paths import Paths
+from scanomatic.ui_server.json_safety import sanitize_json_numbers
 from scanomatic.ui_server.general import (
     convert_path_to_url,
     convert_url_to_path,
@@ -168,15 +169,33 @@ def _validate_lock_key(
     if not key:
         key = ""
 
-    time_stamp, current_key, _ = _read_lock_file(path)
+    time_stamp, current_key, current_ip = _read_lock_file(path)
     lock_state = _get_lock_state(time_stamp, current_key, key)
 
     if lock_state is LockState.Unlocked and (require_claim or key):
         if not key:
             key = _get_key()
-            lock_state = LockState.LockedByMeTemporary
+            lock_state = (
+                LockState.LockedByMe
+                if require_claim
+                else LockState.LockedByMeTemporary
+            )
         else:
             lock_state = LockState.LockedByMe
+    elif (
+        lock_state is LockState.LockedByOther
+        and not key
+        and ip
+        and current_ip
+        and ip == current_ip
+    ):
+        # Recover from stale local locks where a previous session lost the key.
+        key = _get_key()
+        lock_state = (
+            LockState.LockedByMe
+            if require_claim
+            else LockState.LockedByMeTemporary
+        )
     elif not owns_lock(lock_state) and key == Config().ui_server.master_key:
         lock_state = LockState.LockedByMeTemporary
 
@@ -233,7 +252,11 @@ def _get_json_lock_response(
     lock_state: LockState,
 ) -> dict[str, Any]:
     if lock_state is LockState.LockedByMeTemporary:
-        return {"success": True, "lock_state": lock_state.name}
+        return {
+            "success": True,
+            "lock_state": lock_state.name,
+            "lock_key": lock_key,
+        }
     else:
         return {
             "success": owns_lock(lock_state),
@@ -939,8 +962,8 @@ def add_routes(app):
             ))
         rows, cols = state.get_quality_index(plate)
         return jsonify(
-            dim1_rows=rows.tolist(),
-            dim2_cols=cols.tolist(),
+            dim1_rows=sanitize_json_numbers(rows.tolist()),
+            dim2_cols=sanitize_json_numbers(cols.tolist()),
             **response,
         )
 
@@ -1056,12 +1079,12 @@ def add_routes(app):
             plate=plate,
             phenotype=phenotype,
             is_segmentation_based=is_segmentation_based,
-            qindex_rows=qindex_rows.tolist(),
-            qindex_cols=qindex_cols.tolist(),
+            qindex_rows=sanitize_json_numbers(qindex_rows.tolist()),
+            qindex_cols=sanitize_json_numbers(qindex_cols.tolist()),
             **merge_dicts(
                 {
                     filt.name: tuple(
-                        v.tolist() for v in plate_data.where_mask_layer(filt)
+                        sanitize_json_numbers(v.tolist()) for v in plate_data.where_mask_layer(filt)
                     ) for filt in Filter if filt != Filter.OK
                 },
                 response,
@@ -1169,13 +1192,13 @@ def add_routes(app):
             data=plate_data.tojson(),
             plate=plate,
             phenotype=phenotype,
-            qindex_rows=qindex_rows.tolist(),
-            qindex_cols=qindex_cols.tolist(),
+            qindex_rows=sanitize_json_numbers(qindex_rows.tolist()),
+            qindex_cols=sanitize_json_numbers(qindex_cols.tolist()),
             is_segmentation_based=is_segmentation_based,
             **merge_dicts(
                 {
                     filt.name: tuple(
-                        v.tolist() for v in plate_data.where_mask_layer(filt)
+                        sanitize_json_numbers(v.tolist()) for v in plate_data.where_mask_layer(filt)
                     ) for filt in Filter if filt != Filter.OK
                 },
                 response,
@@ -1570,16 +1593,16 @@ def add_routes(app):
         ]
 
         return jsonify(
-            time_data=state.times.tolist(),
-            smooth_data=state.smooth_growth_data[plate][
+            time_data=sanitize_json_numbers(state.times.tolist()),
+            smooth_data=sanitize_json_numbers(state.smooth_growth_data[plate][
                 d1_row,
                 d2_col,
-            ].tolist(),
-            raw_data=state.raw_growth_data[plate][
+            ].tolist()),
+            raw_data=sanitize_json_numbers(state.raw_growth_data[plate][
                 d1_row,
                 d2_col,
-            ].tolist(),
-            segmentations=segmentations,
+            ].tolist()),
+            segmentations=sanitize_json_numbers(segmentations),
             **json_response(
                 ["film_urls", "colony_image", "mark_all_urls"],
                 dict(
@@ -1866,7 +1889,7 @@ def add_routes(app):
         return jsonify(
             offset_name=offset.name,
             offset_value=offset.value,
-            offset_pattern=offset().tolist(),
+            offset_pattern=sanitize_json_numbers(offset().tolist()),
             **response,
         )
 
