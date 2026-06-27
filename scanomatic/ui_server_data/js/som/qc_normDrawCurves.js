@@ -1,9 +1,42 @@
-import { getExtentFromMultipleArrs, getBaseLog } from './qc_normHelper';
+import { getBaseLog } from './qc_normHelper';
 
 const d3 = require('d3/d3.js');
 
 if (!d3.scanomatic) {
   d3.scanomatic = {};
+}
+
+function normalizeCurveData(value) {
+  const src = value || {};
+  const raw = Array.isArray(src.raw_data) ? src.raw_data : [];
+  const smooth = Array.isArray(src.smooth_data) ? src.smooth_data : [];
+  const time = Array.isArray(src.time_data) ? src.time_data : [];
+  return {
+    raw_data: raw,
+    smooth_data: smooth,
+    time_data: time,
+  };
+}
+
+function isFiniteNumber(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function toFiniteSeries(time, values) {
+  if (!Array.isArray(time) || !Array.isArray(values)) {
+    return [];
+  }
+
+  const n = Math.min(time.length, values.length);
+  const out = [];
+  for (let i = 0; i < n; i += 1) {
+    const t = time[i];
+    const v = values[i];
+    if (isFiniteNumber(t) && isFiniteNumber(v) && v > 0) {
+      out.push({ time: t, value: v });
+    }
+  }
+  return out;
 }
 
 export default function DrawCurves(container, data, gt, gtWhen, yld) {
@@ -263,17 +296,6 @@ d3.scanomatic.growthChart = () => {
   }
 
   function update() {
-    function getDataObject(time, value) {
-      const dataObject = [];
-      let i = 0;
-      time.forEach((timePoint) => {
-        const p = { time: timePoint, value: value[i] };
-        dataObject.push(p);
-        i += 1;
-      });
-      return dataObject;
-    }
-
     // data
     const serRaw = data.raw_data;
     const serSmooth = data.smooth_data;
@@ -282,22 +304,42 @@ d3.scanomatic.growthChart = () => {
     const w = width - margin.left - margin.right;
     const h = height - margin.top - margin.bottom;
 
+    if (serRaw.length === 0 || serSmooth.length === 0 || time.length === 0) {
+      throw Error('GrowthData is empty');
+    }
+
     if (serRaw.length !== time.length || serSmooth.length !== time.length) {
       throw Error('GrowthData lengths do not match!!!');
     }
 
-    const odExtend = getExtentFromMultipleArrs(serRaw, serSmooth);
+    const rawData = toFiniteSeries(time, serRaw);
+    const smoothData = toFiniteSeries(time, serSmooth);
 
-    const rawData = getDataObject(time, serRaw);
-    const smoothData = getDataObject(time, serSmooth);
+    if (rawData.length === 0 && smoothData.length === 0) {
+      throw Error('GrowthData has no finite values');
+    }
+
+    const allPoints = rawData.concat(smoothData);
+    const xDomain = d3.extent(allPoints, (d) => d.time);
+    const yDomain = d3.extent(allPoints, (d) => d.value);
+
+    if (
+      !isFiniteNumber(xDomain[0])
+      || !isFiniteNumber(xDomain[1])
+      || !isFiniteNumber(yDomain[0])
+      || !isFiniteNumber(yDomain[1])
+      || yDomain[0] <= 0
+    ) {
+      throw Error('GrowthData has invalid plotting domain');
+    }
 
     const xScale = d3.scale.linear()
-      .domain(d3.extent(time))
+      .domain(xDomain)
       .range([0, w]);
 
     const yScale = d3.scale.log()
       .base(2)
-      .domain(d3.extent(odExtend))
+      .domain(yDomain)
       .range([h, 0]);
 
     addAxis(xScale, yScale, h);
@@ -321,43 +363,43 @@ d3.scanomatic.growthChart = () => {
   chart.update = update;
 
   chart.data = (value) => {
-    if (!arguments.length) return data;
-    data = value;
+    if (typeof value === 'undefined') return data;
+    data = normalizeCurveData(value);
     return chart;
   };
 
   chart.margin = (value) => {
-    if (!arguments.length) return margin;
+    if (typeof value === 'undefined') return margin;
     margin = value;
     return chart;
   };
 
   chart.width = (value) => {
-    if (!arguments.length) return width;
+    if (typeof value === 'undefined') return width;
     width = value;
     return chart;
   };
 
   chart.height = (value) => {
-    if (!arguments.length) return height;
+    if (typeof value === 'undefined') return height;
     height = value;
     return chart;
   };
 
   chart.generationTimeWhen = (value) => {
-    if (!arguments.length) return generationTimeWhen;
+    if (typeof value === 'undefined') return generationTimeWhen;
     generationTimeWhen = value;
     return chart;
   };
 
   chart.generationTime = (value) => {
-    if (!arguments.length) return generationTime;
+    if (typeof value === 'undefined') return generationTime;
     generationTime = value;
     return chart;
   };
 
   chart.growthYield = (value) => {
-    if (!arguments.length) return growthYield;
+    if (typeof value === 'undefined') return growthYield;
     growthYield = value;
     return chart;
   };

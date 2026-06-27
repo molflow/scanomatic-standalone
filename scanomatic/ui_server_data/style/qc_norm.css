@@ -1,4 +1,27 @@
-﻿/* Data Selection*/
+﻿#divMarkStates button {
+  margin-right: 0.5em;
+}
+
+.plate-error,
+.plate-info {
+  margin: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.plate-error {
+  color: #7f1d1d;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+}
+
+.plate-info {
+  color: #1e3a8a;
+  background: #dbeafe;
+  border: 1px solid #93c5fd;
+}
+/* Data Selection*/
 
 .SelectedExperiment {
   stroke: black;

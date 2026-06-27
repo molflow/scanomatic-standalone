@@ -16,6 +16,56 @@ if (!d3.scanomatic) {
   d3.scanomatic = {};
 }
 
+function sanitizePlateMatrix(matrix) {
+  if (!Array.isArray(matrix) || matrix.length === 0) {
+    return [];
+  }
+
+  const rows = Array.from({ length: matrix.length }, (_, i) => {
+    const row = matrix[i];
+    return Array.isArray(row) ? row : [];
+  });
+  const firstValidRow = rows.find((row) => row.length > 0) || [];
+  const cols = firstValidRow.length;
+
+  if (cols === 0) {
+    return [];
+  }
+
+  return rows.map((row) => {
+    if (row.length === cols) {
+      return row;
+    }
+
+    if (row.length > cols) {
+      return row.slice(0, cols);
+    }
+
+    return row.concat(Array(cols - row.length).fill(null));
+  });
+}
+
+function getMatrixDimensions(matrix) {
+  const rowCount = Array.isArray(matrix) ? matrix.length : 0;
+  const firstValidRow = rowCount > 0
+    ? matrix.find((row) => Array.isArray(row) && row.length > 0)
+    : null;
+  const colCount = firstValidRow ? firstValidRow.length : 0;
+  return { rows: rowCount, cols: colCount };
+}
+
+function sanitizeMetaDataType(metaDataType) {
+  if (
+    !Array.isArray(metaDataType)
+    || metaDataType.length < 2
+    || !Array.isArray(metaDataType[0])
+    || !Array.isArray(metaDataType[1])
+  ) {
+    return [[], []];
+  }
+  return metaDataType;
+}
+
 export function addSymbolToSVG(svgRoot, type) {
   let badDataSym;
   let okSym;
@@ -183,9 +233,28 @@ function addSelectionHandling(svgRoot) {
 }
 
 export function DrawPlate(container, data, growthMetaData, plateMetaData, phenotypeName, dispatch) {
+  data = sanitizePlateMatrix(data);
+  const matrixDims = getMatrixDimensions(data);
+  if (matrixDims.rows === 0 || matrixDims.cols === 0) {
+    throw new Error('Plate data matrix is empty or malformed');
+  }
+
+  if (!growthMetaData) {
+    growthMetaData = { gt: null, gtWhen: null, yld: null };
+  }
+
+  if (!plateMetaData) {
+    plateMetaData = {
+      plate_BadData: [[], []],
+      plate_Empty: [[], []],
+      plate_NoGrowth: [[], []],
+      plate_UndecidedProblem: [[], []],
+    };
+  }
+
   // plate
-  const cols = data[0].length;
-  const rows = data.length;
+  const cols = matrixDims.cols;
+  const rows = matrixDims.rows;
   // experiment
   const circleRadius = 4;
   const circleMargin = 1;
@@ -607,6 +676,7 @@ d3.scanomatic.plateHeatmap = () => {
     }
 
     function addmetaDataType(metaDataType, typeName) {
+      metaDataType = sanitizeMetaDataType(metaDataType);
       const dataType = [];
       let badDataElement;
       for (let k = 0; k < metaDataType[0].length; k += 1) {
@@ -816,10 +886,14 @@ d3.scanomatic.plateHeatmap = () => {
   heatmap.update = update;
 
   heatmap.data = (value) => {
-    if (!arguments.length) return data;
-    data = value;
-    cols = data[0].length;
-    rows = data.length;
+    if (typeof value === 'undefined') return data;
+    data = sanitizePlateMatrix(value);
+    const dims = getMatrixDimensions(data);
+    if (dims.rows === 0 || dims.cols === 0) {
+      return heatmap;
+    }
+    cols = dims.cols;
+    rows = dims.rows;
     phenotypeMin = d3.min(data, (array) => d3.min(array));
     phenotypeMax = d3.max(data, (array) => d3.max(array));
     phenotypeMean = d3.mean(data, (array) => d3.mean(array));
@@ -827,31 +901,31 @@ d3.scanomatic.plateHeatmap = () => {
   };
 
   heatmap.phenotypeName = (value) => {
-    if (!arguments.length) return phenotypeName;
+    if (typeof value === 'undefined') return phenotypeName;
     phenotypeName = value;
     return heatmap;
   };
 
   heatmap.growthMetaData = (value) => {
-    if (!arguments.length) return growthMetaData;
+    if (typeof value === 'undefined') return growthMetaData;
     growthMetaData = value;
     return heatmap;
   };
 
   heatmap.plateMetaData = (value) => {
-    if (!arguments.length) return plateMetaData;
+    if (typeof value === 'undefined') return plateMetaData;
     plateMetaData = value;
     return heatmap;
   };
 
   heatmap.cellSize = (value) => {
-    if (!arguments.length) return cellSize;
+    if (typeof value === 'undefined') return cellSize;
     cellSize = value;
     return heatmap;
   };
 
   heatmap.cellRadius = (value) => {
-    if (!arguments.length) return cellRadius;
+    if (typeof value === 'undefined') return cellRadius;
     cellRadius = value;
     heatMapCelHeight = value * 2;
     heatMapCelWidth = value * 2;
@@ -859,13 +933,13 @@ d3.scanomatic.plateHeatmap = () => {
   };
 
   heatmap.colorScale = (value) => {
-    if (!arguments.length) return colorScale;
+    if (typeof value === 'undefined') return colorScale;
     colorScale = value;
     return heatmap;
   };
 
   heatmap.colorSchema = (value) => {
-    if (!arguments.length) return colorSchema;
+    if (typeof value === 'undefined') return colorSchema;
     colorSchema = value;
     return heatmap;
   };
@@ -886,31 +960,31 @@ d3.scanomatic.plateHeatmap = () => {
   };
 
   heatmap.margin = (value) => {
-    if (!arguments.length) return margin;
+    if (typeof value === 'undefined') return margin;
     margin = value;
     return heatmap;
   };
 
   heatmap.displayLegend = (value) => {
-    if (!arguments.length) return displayLegend;
+    if (typeof value === 'undefined') return displayLegend;
     displayLegend = value;
     return heatmap;
   };
 
   heatmap.legendMargin = (value) => {
-    if (!arguments.length) return legendMargin;
+    if (typeof value === 'undefined') return legendMargin;
     legendMargin = value;
     return heatmap;
   };
 
   heatmap.legendWidth = (value) => {
-    if (!arguments.length) return legendWidth;
+    if (typeof value === 'undefined') return legendWidth;
     legendWidth = value;
     return heatmap;
   };
 
   heatmap.dispatch2 = (value) => {
-    if (!arguments.length) return dispatch2;
+    if (typeof value === 'undefined') return dispatch2;
     dispatch2 = value;
     return heatmap;
   };
