@@ -1,5 +1,8 @@
 #!/bin/sh
 set -e
 
-python /opt/setup_config.py
+mkdir -p /root/.scan-o-matic/config
+# Copy default config recursively without overwriting existing user config
+cp -an /tmp/data/config/. /root/.scan-o-matic/config/
+
 exec "$@"

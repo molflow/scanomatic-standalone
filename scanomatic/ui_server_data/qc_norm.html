@@ -228,6 +228,11 @@
           $.modal.close();
         }
 
+        function showPlateMessage(message, isError) {
+          var cls = isError ? "plate-error" : "plate-info";
+          $("#plate").html("<div class='" + cls + "'>" + message + "</div>");
+        }
+
         function getLock_key() {
           return $("#spLock").data("lock_key");
         }
@@ -581,41 +586,60 @@
           var metaDataPath = phenotypePath + plateIdx + "/" + project;
           var lockKey = getLock_key();
           som.GetPlateData(path, isNormalized, metaDataPath, "###", lockKey, function (data) {
-            $("#plate").empty();
-            var allNull = isPlateAllNull(data.plate_data);
-            if (!data || allNull) {
-              stopWait();
-              return;
-            }
-            var plateData = data.plate_data;
-            var plateMetaData = data.Plate_metadata;
-            var growthMetaData = data.Growth_metaData;
-            var phenotypeName = data.plate_phenotype;
-            qIndexQueue = data.plate_qIdxSort;
-            var plate = som.DrawPlate("#plate", plateData, growthMetaData, plateMetaData, phenotypeName, dispatch);
-            var row = $("#currentSelection").data("row");
-            var col = $("#currentSelection").data("col");
-            if (row && col)
-              setExperimentByCoord(row, col);
-            stopWait();
-            plate.on("SelectedExperiment", function (datah) {
-                var arr = datah.coord.split(",");
-                var row = arr[0];
-                var col = arr[1];
-                $("#currentSelection").data("expId", datah.id);
-                $("#currentSelection").data("plateIdx", plateIdx);
-                $("#currentSelection").data("row", row);
-                $("#currentSelection").data("col", col);
-                $("#currentSelection").data("phenotype", datah.phenotype);
-                $("#currentSelection").data("project", $("#spProject").text());
-                // e.g. /api/results/curves/1/31/0/Martin_wt1/analysis
-                var expPath = "/api/results/curves/" + plateIdx + "/" + row + "/" + col + "/" + project;
-                var lockKey = getLock_key();
-                som.GetExperimentGrowthData(expPath, lockKey, function (gData) {
-                  $("#graph").empty();
-                  som.DrawCurves("#graph", gData, datah.metaDataGt, datah.metaDataGtWhen, datah.metaDataYield);
+            try {
+              $("#plate").empty();
+              if (!data) {
+                showPlateMessage("No plate payload returned from API.", true);
+                return;
+              }
+              if (!data.plate_data || !data.plate_data.length) {
+                showPlateMessage("Plate payload is missing matrix data.", true);
+                return;
+              }
+              var allNull = isPlateAllNull(data.plate_data);
+              if (allNull) {
+                showPlateMessage("All values on this plate are null for selected phenotype.", false);
+                return;
+              }
+              var plateData = data.plate_data;
+              var plateMetaData = data.Plate_metadata;
+              var growthMetaData = data.Growth_metaData;
+              var phenotypeName = data.plate_phenotype;
+              qIndexQueue = data.plate_qIdxSort;
+              var plate = som.DrawPlate("#plate", plateData, growthMetaData, plateMetaData, phenotypeName, dispatch);
+              var row = $("#currentSelection").data("row");
+              var col = $("#currentSelection").data("col");
+              if (row && col)
+                setExperimentByCoord(row, col);
+              plate.on("SelectedExperiment", function (datah) {
+                  var arr = datah.coord.split(",");
+                  var row = arr[0];
+                  var col = arr[1];
+                  $("#currentSelection").data("expId", datah.id);
+                  $("#currentSelection").data("plateIdx", plateIdx);
+                  $("#currentSelection").data("row", row);
+                  $("#currentSelection").data("col", col);
+                  $("#currentSelection").data("phenotype", datah.phenotype);
+                  $("#currentSelection").data("project", $("#spProject").text());
+                  // e.g. /api/results/curves/1/31/0/Martin_wt1/analysis
+                  var expPath = "/api/results/curves/" + plateIdx + "/" + row + "/" + col + "/" + project;
+                  var lockKey = getLock_key();
+                  som.GetExperimentGrowthData(expPath, lockKey, function (gData) {
+                    $("#graph").empty();
+                    try {
+                      som.DrawCurves("#graph", gData, datah.metaDataGt, datah.metaDataGtWhen, datah.metaDataYield);
+                    } catch (e) {
+                      console.error('DrawCurves failed', e);
+                      $("#graph").html("<div class='plate-error'>Graph render failed: " + (e && e.message ? e.message : e) + "</div>");
+                    }
+                  });
                 });
-              });
+            } catch (e) {
+              console.error('renderPlate failed', e);
+              showPlateMessage("Render failed: " + (e && e.message ? e.message : e), true);
+            } finally {
+              stopWait();
+            }
           });
         };
       });

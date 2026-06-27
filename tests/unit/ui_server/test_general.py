@@ -54,3 +54,15 @@ def test_get_image_data_as_array_from_str():
     im = general.get_image_data_as_array(im_str)
     assert im.shape == (10, 10, 3)
     assert (im == 1).all()
+
+
+@pytest.mark.parametrize(
+    "name,expected",
+    (
+        ("/api/results/browse/my-project", True),
+        ("/api/results/browse/my_project", True),
+        ("/api/results/browse/../escape", False),
+    ),
+)
+def test_safe_directory_name(name: str, expected: bool):
+    assert general.safe_directory_name(name) is expected

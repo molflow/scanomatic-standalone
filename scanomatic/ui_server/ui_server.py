@@ -13,6 +13,7 @@ from scanomatic.io.logger import get_logger
 from scanomatic.io.paths import Paths
 from scanomatic.io.rpc_client import get_client
 from scanomatic.io.scanstore import ScanStore
+from scanomatic.ui_server.json_safety import SafeJSONEncoder
 
 from . import (
     analysis_api,
@@ -42,6 +43,7 @@ def launch_server(host, port, debug):
     global _URL, _DEBUG_MODE
     _DEBUG_MODE = debug
     app = Flask("Scan-o-Matic UI", template_folder=Paths().ui_templates)
+    app.json_encoder = SafeJSONEncoder
     app.config['scanstore'] = ScanStore(Config().paths.projects_root)
 
     rpc_client = get_client()

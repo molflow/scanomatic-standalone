@@ -32,7 +32,9 @@ from scanomatic.models.fixture_models import (
 )
 
 _safe_dir = re.compile(
-    r"^[A-Za-z_0-9.%/ \\]*$" if os.sep == "\\" else r"^[A-Za-z_0-9.%/ ]*$",
+    r"^[A-Za-z_0-9.%/ \\ -]*$"
+    if os.sep == "\\"
+    else r"^[A-Za-z_0-9.%/ -]*$",
 )
 _no_super = re.compile(r"/?\.{2}/")
 _logger = get_logger("UI API helpers")

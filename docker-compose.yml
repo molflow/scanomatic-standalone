@@ -6,6 +6,6 @@ services:
     environment:
       - LOGGING_LEVEL=20
     volumes:
-      - ${SOM_SETTINGS:-/tmp/.scan-o-matic}:/root/.scan-o-matic
-      - ${SOM_PROJECTS_ROOT:-/tmp/SoM}:/somprojects
+      - ${SOM_SETTINGS:-./.scan-o-matic}:/root/.scan-o-matic
+      - ${SOM_PROJECTS_ROOT:-./somprojects}:/somprojects
       - /dev/bus/usb:/dev/bus/usb

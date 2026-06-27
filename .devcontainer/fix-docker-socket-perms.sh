@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+CURRENT_USER="$(id -un)"
+
 # Align the container user with the mounted docker socket GID.
 if [[ ! -S /var/run/docker.sock ]]; then
   echo "No docker socket mount found; skipping docker group alignment."
@@ -15,10 +17,10 @@ if [[ -z "${EXISTING_GROUP}" ]]; then
   sudo groupadd --gid "${SOCK_GID}" "${TARGET_GROUP}"
 fi
 
-if id -nG "${USER}" | grep -qw "${TARGET_GROUP}"; then
-  echo "User ${USER} already belongs to ${TARGET_GROUP}."
+if id -nG "${CURRENT_USER}" | grep -qw "${TARGET_GROUP}"; then
+  echo "User ${CURRENT_USER} already belongs to ${TARGET_GROUP}."
 else
-  sudo usermod -aG "${TARGET_GROUP}" "${USER}"
-  echo "Added ${USER} to ${TARGET_GROUP}."
+  sudo usermod -aG "${TARGET_GROUP}" "${CURRENT_USER}"
+  echo "Added ${CURRENT_USER} to ${TARGET_GROUP}."
   echo "Rebuild/Reopen once more if docker commands still fail due to cached session groups."
 fi
