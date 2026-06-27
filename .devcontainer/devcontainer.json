@@ -1,25 +1,37 @@
 {
-  "name": "scanomatic-ci-like",
+  "name": "scanomatic-dev",
   "build": {
     "dockerfile": "Dockerfile",
     "context": ".."
   },
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/${localWorkspaceFolderBasename},type=bind",
+  "containerUser": "vscode",
   "remoteUser": "vscode",
   "updateRemoteUserUID": true,
+  "runArgs": [
+    "--init"
+  ],
   "mounts": [
-    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+    "source=/home/joakim/work/scanomatic/.git,target=/home/joakim/work/scanomatic/.git,type=bind",
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind",
+    "source=scanomatic-uv-cache,target=/home/vscode/.cache/uv,type=volume",
+    "source=scanomatic-pip-cache,target=/home/vscode/.cache/pip,type=volume",
+    "source=scanomatic-npm-cache,target=/home/vscode/.npm,type=volume"
   ],
   "containerEnv": {
     "DISPLAY": ":99",
-    "CHROME_BIN": "/usr/bin/chromium"
+    "CHROME_BIN": "/usr/bin/chromium",
+    "SCANOMATIC_DATA": "/workspaces/${localWorkspaceFolderBasename}/.scan-o-matic"
   },
   "forwardPorts": [5000],
   "onCreateCommand": "bash .devcontainer/fix-docker-socket-perms.sh",
+  "postStartCommand": "bash .devcontainer/fix-docker-socket-perms.sh",
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "customizations": {
     "vscode": {
       "settings": {
-        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
         "python.testing.pytestEnabled": true
       },
       "extensions": [

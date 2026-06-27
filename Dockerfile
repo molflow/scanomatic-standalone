@@ -45,7 +45,6 @@ RUN pip install --no-cache-dir uv \
     && rm -rf /root/.cache /tmp/wheels /tmp/requirements.txt
 
 COPY data/ /tmp/data/
-COPY setup_config.py /opt/setup_config.py
 COPY docker-entrypoint.sh /opt/docker-entrypoint.sh
 RUN chmod +x /opt/docker-entrypoint.sh
 
